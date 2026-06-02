@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentemotor — Panel de Gestión</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 20px 0; margin-bottom: 24px; }
+        header .container { display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 1.5em; font-weight: 600; }
+        header span { font-size: 0.85em; opacity: 0.7; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #4361ee; }
+        .stat-card .label { font-size: 0.8em; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .stat-card .value { font-size: 2em; font-weight: 700; }
+        .stat-card.warning { border-left-color: #f8961e; }
+        .stat-card.danger { border-left-color: #e63946; }
+        .stat-card.success { border-left-color: #2ec4b6; }
+        .stat-card.info { border-left-color: #4361ee; }
+
+        .filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filters a { padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 0.85em; font-weight: 500; background: white; color: #1a1a2e; border: 1px solid #dee2e6; transition: all 0.2s; }
+        .filters a:hover, .filters a.active { background: #4361ee; color: white; border-color: #4361ee; }
+
+        table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        th { background: #f8f9fa; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 600; }
+        tr:hover { background: #f8f9ff; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 600; }
+        .badge.active { background: #d4edda; color: #155724; }
+        .badge.expired { background: #f8d7da; color: #721c24; }
+        .badge.renewed { background: #cce5ff; color: #004085; }
+        .badge.baja { background: #e2e3e5; color: #383d41; }
+        .badge.media { background: #fff3cd; color: #856404; }
+        .badge.alta { background: #f8d7da; color: #721c24; }
+        .badge.urgente { background: #f5c6cb; color: #721c24; font-weight: 700; }
+        .badge.perdido { background: #343a40; color: white; }
+        .badge.completada { background: #d4edda; color: #155724; }
+        .btn { display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 0.8em; font-weight: 500; cursor: pointer; border: none; text-decoration: none; transition: all 0.2s; }
+        .btn-primary { background: #4361ee; color: white; }
+        .btn-primary:hover { background: #3a56d4; }
+        .btn-success { background: #2ec4b6; color: white; }
+        .btn-success:hover { background: #26a99d; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-danger { background: #e63946; color: white; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: white; border-radius: 16px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { font-size: 1.2em; }
+        .modal-close { background: none; border: none; font-size: 1.5em; cursor: pointer; color: #6c757d; }
+        .modal-close:hover { color: #1a1a2e; }
+
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .detail-item label { display: block; font-size: 0.75em; color: #6c757d; margin-bottom: 2px; }
+        .detail-item span { font-size: 0.95em; font-weight: 500; }
+
+        .section-title { font-size: 0.9em; font-weight: 600; margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+
+        .attempt-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
+        .attempt-item:last-child { border-bottom: none; }
+        .attempt-meta { display: flex; gap: 12px; font-size: 0.8em; color: #6c757d; margin-bottom: 4px; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.85em; font-weight: 500; margin-bottom: 4px; }
+        .form-group select, .form-group input, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.9em; }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+
+        .flex-row { display: flex; gap: 8px; align-items: center; }
+        .mt-12 { margin-top: 12px; }
+        .mb-8 { margin-bottom: 8px; }
+        .text-sm { font-size: 0.85em; }
+        .text-muted { color: #6c757d; }
+        .text-center { text-align: center; }
+        .empty-state { text-align: center; padding: 40px; color: #6c757d; }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .detail-grid { grid-template-columns: 1fr; }
+            table { font-size: 0.85em; }
+            th, td { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div>
+            <h1>Agentemotor</h1>
+            <span>Panel de gestión — María Asesora</span>
+        </div>
+        <span th:text="${#dates.format(#dates.createNow(), 'EEEE, d MMM yyyy')}"></span>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="stats-grid">
+        <div class="stat-card info">
+            <div class="label">Pólizas activas</div>
+            <div class="value" th:text="${stats.totalActive}">0</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="label">Vencen esta semana</div>
+            <div class="value" th:text="${stats.expiringThisWeek}">0</div>
+        </div>
+        <div class="stat-card danger">
+            <div class="label">Vencidas (30 días)</div>
+            <div class="value" th:text="${stats.expiredWithin30Days}">0</div>
+        </div>
+        <div class="stat-card danger" style="border-left-color: #1a1a2e;">
+            <div class="label">Perdidas</div>
+            <div class="value" th:text="${stats.expiredBeyond30Days}">0</div>
+        </div>
+        <div class="stat-card success">
+            <div class="label">Renovadas</div>
+            <div class="value" th:text="${stats.totalRenewed}">0</div>
+        </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div class="filters" style="margin-bottom:0;">
+        <a href="/?filter=all" th:classappend="${currentFilter == 'all' ? 'active' : ''}">Todas</a>
+        <a href="/?filter=active" th:classappend="${currentFilter == 'active' ? 'active' : ''}">Vigentes</a>
+        <a href="/?filter=expiring" th:classappend="${currentFilter == 'expiring' ? 'active' : ''}">Por vencer (30d)</a>
+        <a href="/?filter=expired_lt_30" th:classappend="${currentFilter == 'expired_lt_30' ? 'active' : ''}">Vencidas &lt;30d</a>
+        <a href="/?filter=expired_gt_30" th:classappend="${currentFilter == 'expired_gt_30' ? 'active' : ''}">Perdidas</a>
+    </div>
+        <a href="/policy/nueva" class="btn btn-success">+ Nueva Póliza</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Póliza</th>
+                <th>Aseguradora</th>
+                <th>Tipo</th>
+                <th>Vencimiento</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Gestiones</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="p : ${policies}">
+                <td><strong th:text="${p.clientName}">-</strong><br><span class="text-sm text-muted" th:text="${p.clientPhone}">-</span></td>
+                <td th:text="${p.policyNumber}">-</td>
+                <td th:text="${p.insurer}">-</td>
+                <td th:text="${p.type}">-</td>
+                <td>
+                    <span th:text="${p.expirationDate}">-</span><br>
+                    <span class="text-sm text-muted">
+                        <span th:if="${p.daysOverdue > 0}" th:text="'Vencida hace ' + ${p.daysOverdue} + ' días'"></span>
+                        <span th:if="${p.daysOverdue == 0 and p.daysUntilExpiry >= 0}" th:text="'Vence en ' + ${p.daysUntilExpiry} + ' días'"></span>
+                    </span>
+                </td>
+                <td><span class="badge" th:classappend="${p.status.toLowerCase()}" th:text="${p.status}"></span></td>
+                <td><span class="badge" th:classappend="${p.priority}" th:text="${p.priority}"></span></td>
+                <td class="text-center" th:text="${p.contactAttempts}">0</td>
+                <td>
+                    <button class="btn btn-primary" th:attr="data-policy-id=${p.id}" onclick="openDetail(this.dataset.policyId)">Gestionar</button>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(policies)}">
+                <td colspan="9" class="empty-state">No hay pólizas que mostrar en este filtro.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-overlay" id="policyModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Gestión de Póliza</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="modalContent">
+            <div class="text-center text-muted" style="padding: 40px;">Cargando...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = '/api';
+    let currentPolicyId = null;
+
+    function openDetail(policyId) {
+        currentPolicyId = policyId;
+        document.getElementById('policyModal').classList.add('open');
+        document.getElementById('modalContent').innerHTML = '<div class="text-center text-muted" style="padding: 40px;">Cargando...</div>';
+        fetchPolicyDetail(policyId);
+    }
+
+    function closeModal() {
+        document.getElementById('policyModal').classList.remove('open');
+        currentPolicyId = null;
+    }
+
+    document.getElementById('policyModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    async function fetchPolicyDetail(policyId) {
+        try {
+            const detail = await apiGet('/policy/' + policyId);
+            renderDetail(detail);
+        } catch (err) {
+            document.getElementById('modalContent').innerHTML =
+                '<div class="text-center text-muted" style="padding: 40px;">Error al cargar la póliza.</div>';
+        }
+    }
+
+    function renderDetail(d) {
+        const actionsHtml = d.status === 'ACTIVE' ? `
+            <div class="section-title">Acciones</div>
+            <div class="flex-row mb-8">
+                <select id="attemptType" style="flex:1;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">
+                    <option value="CALL">Llamada</option>
+                    <option value="WHATSAPP">WhatsApp</option>
+                    <option value="EMAIL">Email</option>
+                </select>
+                <select id="attemptResult" style="flex:1;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">
+                    <option value="CONTACTED">Contactado</option>
+                    <option value="NO_ANSWER">No contestó</option>
+                    <option value="LEFT_MESSAGE">Dejó mensaje</option>
+                    <option value="INTERESTED">Interesado</option>
+                    <option value="NOT_INTERESTED">No interesado</option>
+                </select>
+            </div>
+            <textarea id="attemptNotes" placeholder="Notas de la gestión..." style="width:100%;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;resize:vertical;min-height:50px;margin-bottom:8px;"></textarea>
+            <div class="flex-row">
+                <button class="btn btn-primary" onclick="registerAttempt()">Registrar gestión</button>
+                <button class="btn btn-success" onclick="showRenewForm()">Renovar póliza</button>
+            </div>
+            <div id="renewForm" style="display:none;margin-top:12px;padding:16px;background:#f8f9fa;border-radius:8px;">
+                <div class="form-group">
+                    <label>Nueva fecha de vencimiento</label>
+                    <input type="date" id="newExpirationDate" style="width:100%;padding:8px;border:1px solid #dee2e6;border-radius:6px;">
+                </div>
+                <button class="btn btn-primary" onclick="renewPolicy()">Confirmar renovación</button>
+                <button class="btn btn-secondary" onclick="hideRenewForm()" style="margin-left:4px;">Cancelar</button>
+            </div>
+        ` : '<p class="text-muted">Póliza ya gestionada. No se requieren acciones.</p>';
+
+        const attemptsHtml = d.contactAttemptList && d.contactAttemptList.length > 0
+            ? d.contactAttemptList.map(a => `
+                <div class="attempt-item">
+                    <div class="attempt-meta">
+                        <span>${formatDateTime(a.date)}</span>
+                        <span class="badge" style="background:#e2e3e5;color:#383d41;">${a.type}</span>
+                        <span class="badge" style="background:#cce5ff;color:#004085;">${a.result}</span>
+                    </div>
+                    <div>${a.notes || 'Sin notas'}</div>
+                </div>
+            `).join('')
+            : '<p class="text-muted text-sm">Sin gestiones registradas.</p>';
+
+        document.getElementById('modalContent').innerHTML = `
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Cliente</label>
+                    <span>${d.clientName}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Teléfono</label>
+                    <span>${d.clientPhone || '-'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Póliza</label>
+                    <span>${d.policyNumber}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Aseguradora</label>
+                    <span>${d.insurer}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Tipo</label>
+                    <span>${d.type}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Vencimiento</label>
+                    <span>${d.expirationDate}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Días de vencida</label>
+                    <span style="color:${d.daysOverdue > 30 ? '#e63946' : d.daysOverdue > 0 ? '#f8961e' : '#2ec4b6'}">${d.daysOverdue > 0 ? d.daysOverdue + ' días' : 'No vencida'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Prioridad</label>
+                    <span class="badge" style="text-transform:capitalize;background:${getPriorityColor(d.priority)};color:white;">${d.priority}</span>
+                </div>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <label>Acción recomendada</label>
+                    <span style="font-size:0.9em;">${d.recommendedAction}</span>
+                </div>
+            </div>
+            <div class="section-title">Historial de gestiones (${d.contactAttempts})</div>
+            <div style="max-height:200px;overflow-y:auto;margin-bottom:16px;">${attemptsHtml}</div>
+            ${actionsHtml}
+        `;
+    }
+
+    function getPriorityColor(p) {
+        switch(p) {
+            case 'perdido': return '#343a40';
+            case 'urgente': return '#e63946';
+            case 'alta': return '#f8961e';
+            case 'media': return '#ffd166';
+            case 'baja': return '#6c757d';
+            case 'completada': return '#2ec4b6';
+            default: return '#6c757d';
+        }
+    }
+
+    async function registerAttempt() {
+        const type = document.getElementById('attemptType').value;
+        const result = document.getElementById('attemptResult').value;
+        const notes = document.getElementById('attemptNotes').value;
+        try {
+            await apiPost('/api/contact-attempts', {
+                policyId: currentPolicyId,
+                type: type,
+                result: result,
+                notes: notes
+            });
+            document.getElementById('attemptNotes').value = '';
+            fetchPolicyDetail(currentPolicyId);
+            refreshTable();
+        } catch (err) {
+            alert('Error al registrar la gestión.');
+        }
+    }
+
+    function showRenewForm() {
+        document.getElementById('renewForm').style.display = 'block';
+    }
+
+    function hideRenewForm() {
+        document.getElementById('renewForm').style.display = 'none';
+    }
+
+    async function renewPolicy() {
+        const newDate = document.getElementById('newExpirationDate').value;
+        if (!newDate) { alert('Selecciona una fecha de vencimiento.'); return; }
+        try {
+            await apiPut('/api/policies/' + currentPolicyId + '/renew', {
+                newExpirationDate: newDate
+            });
+            hideRenewForm();
+            fetchPolicyDetail(currentPolicyId);
+            refreshTable();
+        } catch (err) {
+            alert('Error al renovar la póliza.');
+        }
+    }
+
+    function refreshTable() {
+        document.querySelector('.btn.active')?.click();
+    }
+
+    function formatDateTime(dateStr) {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    async function apiGet(url) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+    }
+
+    async function apiPost(url, data) {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+    }
+
+    async function apiPut(url, data) {
+        const res = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+    }
+</script>
+
+</body>
+</html>

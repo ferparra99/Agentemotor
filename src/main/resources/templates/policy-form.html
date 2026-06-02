@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentemotor — Nueva Póliza</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 20px 0; margin-bottom: 24px; }
+        header .container { display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 1.5em; font-weight: 600; }
+        header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9em; }
+        header a:hover { color: white; }
+
+        .card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .card h2 { font-size: 1.2em; margin-bottom: 20px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85em; font-weight: 600; margin-bottom: 4px; color: #1a1a2e; }
+        .form-group select, .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 0.95em; }
+        .form-group select:focus, .form-group input:focus { outline: none; border-color: #4361ee; box-shadow: 0 0 0 3px rgba(67,97,238,0.15); }
+
+        .btn { display: inline-block; padding: 10px 24px; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: all 0.2s; }
+        .btn-primary { background: #4361ee; color: white; }
+        .btn-primary:hover { background: #3a56d4; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+
+        .flex-row { display: flex; gap: 8px; align-items: center; }
+        .mt-20 { margin-top: 20px; }
+        .error { color: #e63946; font-size: 0.85em; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div>
+            <h1>Agentemotor</h1>
+            <span>Nueva póliza</span>
+        </div>
+        <a href="/">&larr; Volver al panel</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>Registrar nueva póliza</h2>
+
+        <form id="policyForm" onsubmit="return submitForm(event)">
+            <div class="form-group">
+                <label for="clientId">Cliente</label>
+                <select id="clientId" required>
+                    <option value="">Seleccione un cliente...</option>
+                    <option th:each="c : ${clients}" th:value="${c.id}" th:text="${c.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="policyNumber">Número de póliza</label>
+                <input type="text" id="policyNumber" placeholder="Ej: AUTO-010-2026" required>
+            </div>
+
+            <div class="form-group">
+                <label for="type">Tipo de seguro</label>
+                <select id="type" required>
+                    <option value="">Seleccione tipo...</option>
+                    <option value="AUTO">Auto</option>
+                    <option value="HOGAR">Hogar</option>
+                    <option value="VIDA">Vida</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="insurer">Aseguradora</label>
+                <input type="text" id="insurer" placeholder="Ej: Seguros Sura" required>
+            </div>
+
+            <div class="form-group">
+                <label for="startDate">Fecha de inicio</label>
+                <input type="date" id="startDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="expirationDate">Fecha de vencimiento</label>
+                <input type="date" id="expirationDate" required>
+            </div>
+
+            <div class="flex-row mt-20">
+                <button type="submit" class="btn btn-primary">Guardar póliza</button>
+                <a href="/" class="btn btn-secondary">Cancelar</a>
+            </div>
+
+            <div id="formError" class="error mt-20" style="display:none;"></div>
+        </form>
+    </div>
+
+    <div id="successMessage" style="display:none;margin-top:16px;padding:16px;background:#d4edda;border-radius:8px;color:#155724;text-align:center;">
+        Póliza creada exitosamente. <a href="/" style="color:#155724;font-weight:600;">Volver al panel</a>
+    </div>
+</div>
+
+<script>
+    async function submitForm(e) {
+        e.preventDefault();
+        const errorEl = document.getElementById('formError');
+        errorEl.style.display = 'none';
+
+        const data = {
+            clientId: parseInt(document.getElementById('clientId').value),
+            policyNumber: document.getElementById('policyNumber').value.trim(),
+            type: document.getElementById('type').value,
+            insurer: document.getElementById('insurer').value.trim(),
+            startDate: document.getElementById('startDate').value,
+            expirationDate: document.getElementById('expirationDate').value
+        };
+
+        if (!data.clientId || !data.policyNumber || !data.type || !data.insurer || !data.startDate || !data.expirationDate) {
+            errorEl.textContent = 'Todos los campos son obligatorios.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/policies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err);
+            }
+            document.getElementById('policyForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+        } catch (err) {
+            errorEl.textContent = 'Error al crear la póliza. Verifica los datos e intenta de nuevo.';
+            errorEl.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>
