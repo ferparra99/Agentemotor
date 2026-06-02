@@ -28,8 +28,19 @@ public class PolicyRestController {
     }
 
     @PostMapping("/policies")
-    public ResponseEntity<PolicySummaryDTO> createPolicy(@RequestBody CreatePolicyRequestDTO request) {
+    public ResponseEntity<PolicySummaryDTO> createPolicy(@RequestBody PolicyRequestDTO request) {
         return ResponseEntity.ok(policyService.createPolicy(request));
+    }
+
+    @PutMapping("/policies/{id}")
+    public ResponseEntity<PolicySummaryDTO> updatePolicy(@PathVariable Long id, @RequestBody PolicyRequestDTO request) {
+        request.setId(id);
+        return ResponseEntity.ok(policyService.updatePolicy(request));
+    }
+
+    @PutMapping("/clients/{id}")
+    public ResponseEntity<ClientDetailDTO> updateClient(@PathVariable Long id, @RequestBody ClientDetailDTO clientData) {
+        return ResponseEntity.ok(policyService.updateClient(id, clientData));
     }
 
     @PutMapping("/policies/{id}/renew")

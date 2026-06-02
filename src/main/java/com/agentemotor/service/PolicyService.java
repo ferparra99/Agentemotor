@@ -9,7 +9,9 @@ public interface PolicyService {
     PolicyDetailDTO getPolicyDetail(Long policyId);
     ContactAttemptDTO registerContactAttempt(ContactAttemptRequestDTO request);
     PolicySummaryDTO renewPolicy(Long policyId, RenewRequestDTO request);
-    PolicySummaryDTO createPolicy(CreatePolicyRequestDTO request);
+    PolicySummaryDTO createPolicy(PolicyRequestDTO request);
+    PolicySummaryDTO updatePolicy(PolicyRequestDTO request);
+    ClientDetailDTO updateClient(Long clientId, ClientDetailDTO clientData);
     ClientDetailDTO getClientDetail(Long clientId);
     List<ClientDetailDTO> getAllClients(Long advisorId);
 }

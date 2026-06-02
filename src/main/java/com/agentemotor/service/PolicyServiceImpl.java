@@ -2,8 +2,13 @@ package com.agentemotor.service;
 
 import com.agentemotor.dto.*;
 import com.agentemotor.model.*;
-import com.agentemotor.repository.*;
+import com.agentemotor.repository.AdvisorRepository;
+import com.agentemotor.repository.ClientRepository;
+import com.agentemotor.repository.ContactAttemptRepository;
+import com.agentemotor.repository.PolicyRepository;
+import com.agentemotor.utils.PolicyConstants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,19 +16,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PolicyServiceImpl implements PolicyService {
 
-    private static final int RENEWAL_WINDOW_DAYS = 30;
-    private static final int URGENT_THRESHOLD_DAYS = 7;
-
     private final PolicyRepository policyRepository;
     private final ClientRepository clientRepository;
     private final ContactAttemptRepository contactAttemptRepository;
     private final AdvisorRepository advisorRepository;
+
+    @Lazy
+    private PolicyService self;
 
     @Override
     @Transactional(readOnly = true)
@@ -31,28 +36,43 @@ public class PolicyServiceImpl implements PolicyService {
         List<Policy> policies = filterPolicies(advisorId, filter);
         return policies.stream()
                 .map(this::toSummaryDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<Policy> filterPolicies(Long advisorId, String filter) {
         LocalDate today = LocalDate.now();
 
-        return switch (filter != null ? filter.toLowerCase() : "all") {
-            case "expiring" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVE)
+        String f = filter != null ? filter.toLowerCase() : "all";
+
+        if ("interested".equals(f) || "not_interested".equals(f)) {
+            ContactAttemptResult targetResult = "interested".equals(f)
+                    ? ContactAttemptResult.INTERESTED
+                    : ContactAttemptResult.NOT_INTERESTED;
+            return policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA)
+                    .stream()
+                    .filter(p -> {
+                        Optional<ContactAttempt> last = contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(p.getId());
+                        return last.isPresent() && last.get().getResult() == targetResult;
+                    })
+                    .toList();
+        }
+
+        return switch (f) {
+            case "expiring" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA)
                     .stream()
                     .filter(p -> !p.getExpirationDate().isBefore(today)
                             && !p.getExpirationDate().isAfter(today.plusDays(30)))
-                    .collect(Collectors.toList());
-            case "expired_lt_30" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVE)
+                    .toList();
+            case "expired_lt_30" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA)
                     .stream()
                     .filter(p -> p.getExpirationDate().isBefore(today)
-                            && !p.getExpirationDate().isBefore(today.minusDays(RENEWAL_WINDOW_DAYS)))
-                    .collect(Collectors.toList());
-            case "expired_gt_30" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVE)
+                            && !p.getExpirationDate().isBefore(today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS)))
+                    .toList();
+            case "expired_gt_30" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA)
                     .stream()
-                    .filter(p -> p.getExpirationDate().isBefore(today.minusDays(RENEWAL_WINDOW_DAYS)))
-                    .collect(Collectors.toList());
-            case "active" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVE);
+                    .filter(p -> p.getExpirationDate().isBefore(today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS)))
+                    .toList();
+            case "active" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA);
             default -> policyRepository.findByAdvisorId(advisorId);
         };
     }
@@ -61,7 +81,7 @@ public class PolicyServiceImpl implements PolicyService {
     @Transactional(readOnly = true)
     public DashboardStatsDTO getDashboardStats(Long advisorId) {
         LocalDate today = LocalDate.now();
-        List<Policy> allActive = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVE);
+        List<Policy> allActive = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA);
 
         long expiringThisWeek = allActive.stream()
                 .filter(p -> !p.getExpirationDate().isBefore(today)
@@ -73,12 +93,12 @@ public class PolicyServiceImpl implements PolicyService {
                 .count();
         long expiredWithin30Days = allActive.stream()
                 .filter(p -> p.getExpirationDate().isBefore(today)
-                        && !p.getExpirationDate().isBefore(today.minusDays(RENEWAL_WINDOW_DAYS)))
+                        && !p.getExpirationDate().isBefore(today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS)))
                 .count();
         long expiredBeyond30Days = allActive.stream()
-                .filter(p -> p.getExpirationDate().isBefore(today.minusDays(RENEWAL_WINDOW_DAYS)))
+                .filter(p -> p.getExpirationDate().isBefore(today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS)))
                 .count();
-        long totalRenewed = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.RENEWED).size();
+        long totalRenewed = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.RENOVADA).size();
 
         return DashboardStatsDTO.builder()
                 .totalActive(allActive.size())
@@ -94,7 +114,7 @@ public class PolicyServiceImpl implements PolicyService {
     @Transactional(readOnly = true)
     public PolicyDetailDTO getPolicyDetail(Long policyId) {
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new IllegalArgumentException("Policy not found: " + policyId));
+                .orElseThrow(() -> new IllegalArgumentException(PolicyConstants.POLICY_NOT_FOUND + policyId));
 
         Client client = policy.getClient();
         List<ContactAttempt> attempts = contactAttemptRepository.findByPolicyIdOrderByDateDesc(policyId);
@@ -108,7 +128,7 @@ public class PolicyServiceImpl implements PolicyService {
                         .result(a.getResult().name())
                         .notes(a.getNotes())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
 
         return buildPolicyDetailDTO(policy, client, attemptDTOs, totalAttempts);
     }
@@ -117,7 +137,7 @@ public class PolicyServiceImpl implements PolicyService {
     @Transactional
     public ContactAttemptDTO registerContactAttempt(ContactAttemptRequestDTO request) {
         Policy policy = policyRepository.findById(request.getPolicyId())
-                .orElseThrow(() -> new IllegalArgumentException("Policy not found: " + request.getPolicyId()));
+                .orElseThrow(() -> new IllegalArgumentException(PolicyConstants.POLICY_NOT_FOUND + request.getPolicyId()));
 
         ContactAttempt attempt = ContactAttempt.builder()
                 .policy(policy)
@@ -142,9 +162,9 @@ public class PolicyServiceImpl implements PolicyService {
     @Transactional
     public PolicySummaryDTO renewPolicy(Long policyId, RenewRequestDTO request) {
         Policy oldPolicy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new IllegalArgumentException("Policy not found: " + policyId));
+                .orElseThrow(() -> new IllegalArgumentException(PolicyConstants.POLICY_NOT_FOUND + policyId));
 
-        oldPolicy.setStatus(PolicyStatus.RENEWED);
+        oldPolicy.setStatus(PolicyStatus.RENOVADA);
         policyRepository.save(oldPolicy);
 
         Policy newPolicy = Policy.builder()
@@ -153,7 +173,7 @@ public class PolicyServiceImpl implements PolicyService {
                 .insurer(oldPolicy.getInsurer())
                 .startDate(request.getNewExpirationDate().minusMonths(12))
                 .expirationDate(request.getNewExpirationDate())
-                .status(PolicyStatus.ACTIVE)
+                .status(PolicyStatus.ACTIVA)
                 .renewalCount(oldPolicy.getRenewalCount() + 1)
                 .client(oldPolicy.getClient())
                 .advisor(oldPolicy.getAdvisor())
@@ -166,10 +186,18 @@ public class PolicyServiceImpl implements PolicyService {
 
     @Override
     @Transactional
-    public PolicySummaryDTO createPolicy(CreatePolicyRequestDTO request) {
-        Client client = clientRepository.findById(request.getClientId())
-                .orElseThrow(() -> new IllegalArgumentException("Client not found: " + request.getClientId()));
-        Advisor advisor = client.getAdvisor();
+    public PolicySummaryDTO createPolicy(PolicyRequestDTO request) {
+        Advisor advisor = advisorRepository.findById(PolicyConstants.DEFAULT_ADVISOR_ID)
+                .orElseThrow(() -> new IllegalArgumentException(PolicyConstants.ADVISOR_NOT_FOUND));
+
+        Client client = Client.builder()
+                .name(request.getClientName())
+                .phone(request.getClientPhone() != null ? request.getClientPhone() : "")
+                .email(request.getClientEmail())
+                .notes(request.getClientNotes())
+                .advisor(advisor)
+                .build();
+        client = clientRepository.save(client);
 
         Policy policy = Policy.builder()
                 .policyNumber(request.getPolicyNumber())
@@ -177,7 +205,7 @@ public class PolicyServiceImpl implements PolicyService {
                 .insurer(request.getInsurer())
                 .startDate(request.getStartDate())
                 .expirationDate(request.getExpirationDate())
-                .status(PolicyStatus.ACTIVE)
+                .status(PolicyStatus.ACTIVA)
                 .renewalCount(0)
                 .client(client)
                 .advisor(advisor)
@@ -188,14 +216,45 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     @Override
+    @Transactional
+    public PolicySummaryDTO updatePolicy(PolicyRequestDTO request) {
+        Policy policy = policyRepository.findById(request.getId())
+                .orElseThrow(() -> new IllegalArgumentException(PolicyConstants.POLICY_NOT_FOUND + request.getId()));
+
+        if (request.getPolicyNumber() != null) policy.setPolicyNumber(request.getPolicyNumber());
+        if (request.getType() != null) policy.setType(PolicyType.valueOf(request.getType()));
+        if (request.getInsurer() != null) policy.setInsurer(request.getInsurer());
+        if (request.getStartDate() != null) policy.setStartDate(request.getStartDate());
+        if (request.getExpirationDate() != null) policy.setExpirationDate(request.getExpirationDate());
+
+        policy = policyRepository.save(policy);
+        return toSummaryDTO(policy);
+    }
+
+    @Override
+    @Transactional
+    public ClientDetailDTO updateClient(Long clientId, ClientDetailDTO clientData) {
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new IllegalArgumentException(PolicyConstants.CLIENT_NOT_FOUND + clientId));
+
+        if (clientData.getName() != null) client.setName(clientData.getName());
+        if (clientData.getPhone() != null) client.setPhone(clientData.getPhone());
+        if (clientData.getEmail() != null) client.setEmail(clientData.getEmail());
+        if (clientData.getNotes() != null) client.setNotes(clientData.getNotes());
+
+        client = clientRepository.save(client);
+        return self.getClientDetail(client.getId());
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public ClientDetailDTO getClientDetail(Long clientId) {
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new IllegalArgumentException("Client not found: " + clientId));
+                .orElseThrow(() -> new IllegalArgumentException(PolicyConstants.CLIENT_NOT_FOUND + clientId));
 
         List<Policy> allPolicies = policyRepository.findByClientId(clientId);
         long activeCount = allPolicies.stream()
-                .filter(p -> p.getStatus() == PolicyStatus.ACTIVE)
+                .filter(p -> p.getStatus() == PolicyStatus.ACTIVA)
                 .count();
 
         return ClientDetailDTO.builder()
@@ -217,13 +276,24 @@ public class PolicyServiceImpl implements PolicyService {
                         .id(c.getId())
                         .name(c.getName())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private PolicySummaryDTO toSummaryDTO(Policy policy) {
         LocalDate today = LocalDate.now();
         Client client = policy.getClient();
         int attempts = contactAttemptRepository.countByPolicyId(policy.getId());
+
+        String interestStatus = null;
+        Optional<ContactAttempt> lastAttempt = contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(policy.getId());
+        if (lastAttempt.isPresent()) {
+            ContactAttemptResult r = lastAttempt.get().getResult();
+            if (r == ContactAttemptResult.INTERESTED) {
+                interestStatus = "Interesado";
+            } else if (r == ContactAttemptResult.NOT_INTERESTED) {
+                interestStatus = "No interesado";
+            }
+        }
 
         return PolicySummaryDTO.builder()
                 .id(policy.getId())
@@ -239,6 +309,7 @@ public class PolicyServiceImpl implements PolicyService {
                 .priority(calculatePriority(policy, today))
                 .contactAttempts(attempts)
                 .recommendedAction(calculateRecommendedAction(policy, today))
+                .interestStatus(interestStatus)
                 .build();
     }
 
@@ -261,6 +332,7 @@ public class PolicyServiceImpl implements PolicyService {
                 .priority(calculatePriority(policy, today))
                 .recommendedAction(calculateRecommendedAction(policy, today))
                 .contactAttempts(totalAttempts)
+                .clientId(client.getId())
                 .clientName(client.getName())
                 .clientPhone(client.getPhone())
                 .clientEmail(client.getEmail())
@@ -269,44 +341,43 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     private String calculatePriority(Policy policy, LocalDate today) {
-        if (policy.getStatus() != PolicyStatus.ACTIVE) {
-            return "completada";
+        if (policy.getStatus() != PolicyStatus.ACTIVA) {
+            return PolicyConstants.PRIORITY_COMPLETADA;
         }
         long daysOverdue = ChronoUnit.DAYS.between(policy.getExpirationDate(), today);
         long daysUntilExpiry = ChronoUnit.DAYS.between(today, policy.getExpirationDate());
 
-        if (daysOverdue > RENEWAL_WINDOW_DAYS) {
-            return "perdido";
+        if (daysOverdue > PolicyConstants.RENEWAL_WINDOW_DAYS) {
+            return PolicyConstants.PRIORITY_PERDIDO;
         }
-        if (daysOverdue > URGENT_THRESHOLD_DAYS) {
-            return "urgente";
+        if (daysOverdue > PolicyConstants.URGENT_THRESHOLD_DAYS) {
+            return PolicyConstants.PRIORITY_URGENTE;
         }
         if (daysOverdue > 0) {
-            return "alta";
+            return PolicyConstants.PRIORITY_ALTA;
         }
         if (daysUntilExpiry <= 7) {
-            return "alta";
+            return PolicyConstants.PRIORITY_ALTA;
         }
         if (daysUntilExpiry <= 30) {
-            return "media";
+            return PolicyConstants.PRIORITY_MEDIA;
         }
-        return "baja";
+        return PolicyConstants.PRIORITY_BAJA;
     }
 
     private String calculateRecommendedAction(Policy policy, LocalDate today) {
-        if (policy.getStatus() != PolicyStatus.ACTIVE) {
-            return "Póliza ya gestionada";
+        if (policy.getStatus() != PolicyStatus.ACTIVA) {
+            return PolicyConstants.ACTION_ALREADY_MANAGED;
         }
         long daysOverdue = ChronoUnit.DAYS.between(policy.getExpirationDate(), today);
 
-        if (daysOverdue > RENEWAL_WINDOW_DAYS) {
-            return "Cliente perdido — fuera de ventana de renovación de 30 días. Contactar para nueva contratación.";
+        if (daysOverdue > PolicyConstants.RENEWAL_WINDOW_DAYS) {
+            return String.format(PolicyConstants.ACTION_CLIENT_LOST, PolicyConstants.RENEWAL_WINDOW_DAYS);
         }
         if (daysOverdue > 0) {
-            long remaining = RENEWAL_WINDOW_DAYS - daysOverdue;
-            return "Contactar urgentemente — ventana de renovación de " + RENEWAL_WINDOW_DAYS +
-                    " días. Quedan " + remaining + " días.";
+            long remaining = PolicyConstants.RENEWAL_WINDOW_DAYS - daysOverdue;
+            return String.format(PolicyConstants.ACTION_CONTACT_URGENT, PolicyConstants.RENEWAL_WINDOW_DAYS, remaining);
         }
-        return "Gestionar renovación antes del vencimiento.";
+        return PolicyConstants.ACTION_BEFORE_EXPIRY;
     }
 }

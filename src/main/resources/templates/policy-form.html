@@ -51,11 +51,13 @@
 
         <form id="policyForm" onsubmit="return submitForm(event)">
             <div class="form-group">
-                <label for="clientId">Cliente</label>
-                <select id="clientId" required>
-                    <option value="">Seleccione un cliente...</option>
-                    <option th:each="c : ${clients}" th:value="${c.id}" th:text="${c.name}"></option>
-                </select>
+                <label for="clientName">Nombre del cliente</label>
+                <input type="text" id="clientName" placeholder="Ej: Juan Pérez" required>
+            </div>
+
+            <div class="form-group">
+                <label for="clientPhone">Teléfono del cliente</label>
+                <input type="tel" id="clientPhone" placeholder="Ej: +57 300 123 4567">
             </div>
 
             <div class="form-group">
@@ -109,7 +111,8 @@
         errorEl.style.display = 'none';
 
         const data = {
-            clientId: parseInt(document.getElementById('clientId').value),
+            clientName: document.getElementById('clientName').value.trim(),
+            clientPhone: document.getElementById('clientPhone').value.trim(),
             policyNumber: document.getElementById('policyNumber').value.trim(),
             type: document.getElementById('type').value,
             insurer: document.getElementById('insurer').value.trim(),
@@ -117,8 +120,8 @@
             expirationDate: document.getElementById('expirationDate').value
         };
 
-        if (!data.clientId || !data.policyNumber || !data.type || !data.insurer || !data.startDate || !data.expirationDate) {
-            errorEl.textContent = 'Todos los campos son obligatorios.';
+        if (!data.clientName || !data.policyNumber || !data.type || !data.insurer || !data.startDate || !data.expirationDate) {
+            errorEl.textContent = 'Todos los campos obligatorios deben estar diligenciados.';
             errorEl.style.display = 'block';
             return;
         }

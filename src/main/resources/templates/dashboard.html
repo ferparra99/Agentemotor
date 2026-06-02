@@ -31,15 +31,17 @@
         th { background: #f8f9fa; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 600; }
         tr:hover { background: #f8f9ff; }
         .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 600; }
-        .badge.active { background: #d4edda; color: #155724; }
-        .badge.expired { background: #f8d7da; color: #721c24; }
-        .badge.renewed { background: #cce5ff; color: #004085; }
+        .badge.activa { background: #d4edda; color: #155724; }
+        .badge.vencida { background: #f8d7da; color: #721c24; }
+        .badge.renovada { background: #cce5ff; color: #004085; }
         .badge.baja { background: #e2e3e5; color: #383d41; }
         .badge.media { background: #fff3cd; color: #856404; }
         .badge.alta { background: #f8d7da; color: #721c24; }
         .badge.urgente { background: #f5c6cb; color: #721c24; font-weight: 700; }
         .badge.perdido { background: #343a40; color: white; }
         .badge.completada { background: #d4edda; color: #155724; }
+        .badge.interesado { background: #fdb953; color: #614500; }
+        .badge.no-interesado { background: #e2e3e5; color: #383d41; }
         .btn { display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 0.8em; font-weight: 500; cursor: pointer; border: none; text-decoration: none; transition: all 0.2s; }
         .btn-primary { background: #4361ee; color: white; }
         .btn-primary:hover { background: #3a56d4; }
@@ -131,6 +133,8 @@
         <a href="/?filter=expiring" th:classappend="${currentFilter == 'expiring' ? 'active' : ''}">Por vencer (30d)</a>
         <a href="/?filter=expired_lt_30" th:classappend="${currentFilter == 'expired_lt_30' ? 'active' : ''}">Vencidas &lt;30d</a>
         <a href="/?filter=expired_gt_30" th:classappend="${currentFilter == 'expired_gt_30' ? 'active' : ''}">Perdidas</a>
+        <a href="/?filter=interested" th:classappend="${currentFilter == 'interested' ? 'active' : ''}">Interesados</a>
+        <a href="/?filter=not_interested" th:classappend="${currentFilter == 'not_interested' ? 'active' : ''}">No interesados</a>
     </div>
         <a href="/policy/nueva" class="btn btn-success">+ Nueva Póliza</a>
     </div>
@@ -163,7 +167,10 @@
                     </span>
                 </td>
                 <td><span class="badge" th:classappend="${p.status.toLowerCase()}" th:text="${p.status}"></span></td>
-                <td><span class="badge" th:classappend="${p.priority}" th:text="${p.priority}"></span></td>
+                <td>
+                    <span class="badge" th:classappend="${p.priority}" th:text="${p.priority}"></span>
+                    <span th:if="${p.interestStatus}" class="badge" th:classappend="${#strings.toLowerCase(p.interestStatus).replace(' ', '-')}" style="margin-left:4px;text-transform:none;" th:text="${p.interestStatus}"></span>
+                </td>
                 <td class="text-center" th:text="${p.contactAttempts}">0</td>
                 <td>
                     <button class="btn btn-primary" th:attr="data-policy-id=${p.id}" onclick="openDetail(this.dataset.policyId)">Gestionar</button>
@@ -180,7 +187,10 @@
     <div class="modal">
         <div class="modal-header">
             <h2>Gestión de Póliza</h2>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn btn-secondary" id="editToggleBtn" style="font-size:0.8em;" onclick="toggleEditMode()">Editar</button>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
         </div>
         <div id="modalContent">
             <div class="text-center text-muted" style="padding: 40px;">Cargando...</div>
@@ -202,6 +212,7 @@
     function closeModal() {
         document.getElementById('policyModal').classList.remove('open');
         currentPolicyId = null;
+        refreshTable();
     }
 
     document.getElementById('policyModal').addEventListener('click', function(e) {
@@ -223,34 +234,43 @@
     }
 
     function renderDetail(d) {
-        const actionsHtml = d.status === 'ACTIVE' ? `
-            <div class="section-title">Acciones</div>
-            <div class="flex-row mb-8">
-                <select id="attemptType" style="flex:1;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">
-                    <option value="CALL">Llamada</option>
-                    <option value="WHATSAPP">WhatsApp</option>
-                    <option value="EMAIL">Email</option>
-                </select>
-                <select id="attemptResult" style="flex:1;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">
-                    <option value="CONTACTED">Contactado</option>
-                    <option value="NO_ANSWER">No contestó</option>
-                    <option value="LEFT_MESSAGE">Dejó mensaje</option>
-                    <option value="INTERESTED">Interesado</option>
-                    <option value="NOT_INTERESTED">No interesado</option>
-                </select>
+        currentDetail = d;
+        isEditMode = false;
+        document.getElementById('editToggleBtn').textContent = 'Editar';
+        const actionsHtml = d.status === 'ACTIVA' ? `
+            <div id="editActions" style="display:none;" class="mt-12">
+                <button class="btn btn-success" onclick="saveEdits()">Guardar cambios</button>
+                <button class="btn btn-secondary" onclick="exitEditMode()" style="margin-left:4px;">Cancelar</button>
             </div>
-            <textarea id="attemptNotes" placeholder="Notas de la gestión..." style="width:100%;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;resize:vertical;min-height:50px;margin-bottom:8px;"></textarea>
-            <div class="flex-row">
-                <button class="btn btn-primary" onclick="registerAttempt()">Registrar gestión</button>
-                <button class="btn btn-success" onclick="showRenewForm()">Renovar póliza</button>
-            </div>
-            <div id="renewForm" style="display:none;margin-top:12px;padding:16px;background:#f8f9fa;border-radius:8px;">
-                <div class="form-group">
-                    <label>Nueva fecha de vencimiento</label>
-                    <input type="date" id="newExpirationDate" style="width:100%;padding:8px;border:1px solid #dee2e6;border-radius:6px;">
+            <div id="normalActions">
+                <div class="section-title">Acciones</div>
+                <div class="flex-row mb-8">
+                    <select id="attemptType" style="flex:1;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">
+                        <option value="CALL">Llamada</option>
+                        <option value="WHATSAPP">WhatsApp</option>
+                        <option value="EMAIL">Email</option>
+                    </select>
+                    <select id="attemptResult" style="flex:1;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">
+                        <option value="CONTACTED">Contactado</option>
+                        <option value="NO_ANSWER">No contestó</option>
+                        <option value="LEFT_MESSAGE">Dejó mensaje</option>
+                        <option value="INTERESTED">Interesado</option>
+                        <option value="NOT_INTERESTED">No interesado</option>
+                    </select>
                 </div>
-                <button class="btn btn-primary" onclick="renewPolicy()">Confirmar renovación</button>
-                <button class="btn btn-secondary" onclick="hideRenewForm()" style="margin-left:4px;">Cancelar</button>
+                <textarea id="attemptNotes" placeholder="Notas de la gestión..." style="width:100%;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;resize:vertical;min-height:50px;margin-bottom:8px;"></textarea>
+                <div class="flex-row">
+                    <button class="btn btn-primary" onclick="registerAttempt()">Registrar gestión</button>
+                    <button class="btn btn-success" onclick="showRenewForm()">Renovar póliza</button>
+                </div>
+                <div id="renewForm" style="display:none;margin-top:12px;padding:16px;background:#f8f9fa;border-radius:8px;">
+                    <div class="form-group">
+                        <label>Nueva fecha de vencimiento</label>
+                        <input type="date" id="newExpirationDate" style="width:100%;padding:8px;border:1px solid #dee2e6;border-radius:6px;">
+                    </div>
+                    <button class="btn btn-primary" onclick="renewPolicy()">Confirmar renovación</button>
+                    <button class="btn btn-secondary" onclick="hideRenewForm()" style="margin-left:4px;">Cancelar</button>
+                </div>
             </div>
         ` : '<p class="text-muted">Póliza ya gestionada. No se requieren acciones.</p>';
 
@@ -268,30 +288,31 @@
             : '<p class="text-muted text-sm">Sin gestiones registradas.</p>';
 
         document.getElementById('modalContent').innerHTML = `
-            <div class="detail-grid">
-                <div class="detail-item">
+            <div id="editIndicator" style="display:none;padding:8px 12px;background:#fff3cd;border-radius:8px;margin-bottom:12px;font-size:0.85em;color:#856404;">Modo edición — modifica los campos y guarda los cambios.</div>
+            <div class="detail-grid" id="detailGrid">
+                <div class="detail-item" data-field="clientName" data-client="true">
                     <label>Cliente</label>
-                    <span>${d.clientName}</span>
+                    <span class="field-value">${d.clientName}</span>
                 </div>
-                <div class="detail-item">
+                <div class="detail-item" data-field="clientPhone" data-client="true">
                     <label>Teléfono</label>
-                    <span>${d.clientPhone || '-'}</span>
+                    <span class="field-value">${d.clientPhone || '-'}</span>
                 </div>
-                <div class="detail-item">
+                <div class="detail-item" data-field="policyNumber">
                     <label>Póliza</label>
-                    <span>${d.policyNumber}</span>
+                    <span class="field-value">${d.policyNumber}</span>
                 </div>
-                <div class="detail-item">
+                <div class="detail-item" data-field="insurer">
                     <label>Aseguradora</label>
-                    <span>${d.insurer}</span>
+                    <span class="field-value">${d.insurer}</span>
                 </div>
-                <div class="detail-item">
+                <div class="detail-item" data-field="type">
                     <label>Tipo</label>
-                    <span>${d.type}</span>
+                    <span class="field-value">${d.type}</span>
                 </div>
-                <div class="detail-item">
+                <div class="detail-item" data-field="expirationDate">
                     <label>Vencimiento</label>
-                    <span>${d.expirationDate}</span>
+                    <span class="field-value">${d.expirationDate}</span>
                 </div>
                 <div class="detail-item">
                     <label>Días de vencida</label>
@@ -374,6 +395,95 @@
         if (!dateStr) return '-';
         const d = new Date(dateStr);
         return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    let currentDetail = null;
+    let isEditMode = false;
+
+    function toggleEditMode() {
+        if (isEditMode) {
+            exitEditMode();
+        } else {
+            enterEditMode();
+        }
+    }
+
+    function enterEditMode() {
+        if (!currentDetail || currentDetail.status !== 'ACTIVA') return;
+        isEditMode = true;
+        document.getElementById('editToggleBtn').textContent = 'Cancelar';
+        document.getElementById('editIndicator').style.display = 'block';
+        document.getElementById('editActions').style.display = 'flex';
+        document.getElementById('normalActions').style.display = 'none';
+
+        const grid = document.getElementById('detailGrid');
+        grid.querySelectorAll('.detail-item[data-field]').forEach(item => {
+            const field = item.dataset.field;
+            const valueEl = item.querySelector('.field-value');
+            const currentValue = valueEl.textContent;
+            let inputHtml = '';
+            if (field === 'type') {
+                inputHtml = `<select class="edit-input" style="width:100%;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">
+                    <option value="AUTO" ${currentValue === 'AUTO' ? 'selected' : ''}>Auto</option>
+                    <option value="HOGAR" ${currentValue === 'HOGAR' ? 'selected' : ''}>Hogar</option>
+                    <option value="VIDA" ${currentValue === 'VIDA' ? 'selected' : ''}>Vida</option>
+                </select>`;
+            } else if (field === 'expirationDate') {
+                inputHtml = `<input type="date" class="edit-input" value="${currentValue}" style="width:100%;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">`;
+            } else if (field === 'clientPhone' || field === 'phone') {
+                inputHtml = `<input type="tel" class="edit-input" value="${currentValue === '-' ? '' : currentValue}" style="width:100%;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">`;
+            } else {
+                inputHtml = `<input type="text" class="edit-input" value="${currentValue}" style="width:100%;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;">`;
+            }
+            valueEl.innerHTML = inputHtml;
+        });
+    }
+
+    function exitEditMode() {
+        isEditMode = false;
+        document.getElementById('editToggleBtn').textContent = 'Editar';
+        document.getElementById('editIndicator').style.display = 'none';
+        document.getElementById('editActions').style.display = 'none';
+        document.getElementById('normalActions').style.display = 'block';
+        if (currentDetail) renderDetail(currentDetail);
+    }
+
+    async function saveEdits() {
+        if (!currentDetail) return;
+
+        const policyData = { id: currentDetail.id };
+        const clientData = { id: currentDetail.clientId };
+
+        document.querySelectorAll('#detailGrid .detail-item[data-field]').forEach(item => {
+            const field = item.dataset.field;
+            const input = item.querySelector('.edit-input');
+            if (!input) return;
+            const value = input.value;
+
+            if (item.dataset.client) {
+                clientData[field.replace('client', '').toLowerCase()] = value;
+                if (field === 'clientName') clientData.name = value;
+                if (field === 'clientPhone') clientData.phone = value;
+            } else {
+                if (field === 'expirationDate') {
+                    policyData.expirationDate = value;
+                } else {
+                    policyData[field] = value;
+                }
+            }
+        });
+
+        try {
+            if (currentDetail.clientId) {
+                await apiPut('/api/clients/' + currentDetail.clientId, clientData);
+            }
+            await apiPut('/api/policies/' + currentDetail.id, policyData);
+            exitEditMode();
+            fetchPolicyDetail(currentDetail.id);
+            refreshTable();
+        } catch (err) {
+            alert('Error al guardar los cambios.');
+        }
     }
 
     async function apiGet(url) {

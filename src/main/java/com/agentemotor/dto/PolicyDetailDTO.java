@@ -18,6 +18,7 @@ public class PolicyDetailDTO {
     private String priority;
     private String recommendedAction;
     private int contactAttempts;
+    private Long clientId;
     private String clientName;
     private String clientPhone;
     private String clientEmail;

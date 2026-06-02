@@ -54,7 +54,7 @@ class PolicyServiceTest {
                 .insurer("Test Insurer")
                 .startDate(today.minusMonths(12))
                 .expirationDate(today.minusDays(5))
-                .status(PolicyStatus.ACTIVE)
+                .status(PolicyStatus.ACTIVA)
                 .renewalCount(0)
                 .client(client1)
                 .advisor(advisor)
@@ -67,7 +67,7 @@ class PolicyServiceTest {
                 .insurer("Test Insurer")
                 .startDate(today.minusMonths(13))
                 .expirationDate(today.minusDays(35))
-                .status(PolicyStatus.ACTIVE)
+                .status(PolicyStatus.ACTIVA)
                 .renewalCount(0)
                 .client(client2)
                 .advisor(advisor)
@@ -80,7 +80,7 @@ class PolicyServiceTest {
                 .insurer("Test Insurer")
                 .startDate(today.minusMonths(6))
                 .expirationDate(today.plusDays(60))
-                .status(PolicyStatus.ACTIVE)
+                .status(PolicyStatus.ACTIVA)
                 .renewalCount(0)
                 .client(client1)
                 .advisor(advisor)
@@ -131,19 +131,19 @@ class PolicyServiceTest {
         PolicySummaryDTO renewed = policyService.renewPolicy(policyToRenew.getId(), renewRequest);
 
         assertThat(renewed).isNotNull();
-        assertThat(renewed.getStatus()).isEqualTo("ACTIVE");
+        assertThat(renewed.getStatus()).isEqualTo("ACTIVA");
         assertThat(renewed.getPolicyNumber()).contains("-R1");
 
         Policy originalPolicy = policyRepository.findById(policyToRenew.getId()).orElseThrow();
-        assertThat(originalPolicy.getStatus()).isEqualTo(PolicyStatus.RENEWED);
+        assertThat(originalPolicy.getStatus()).isEqualTo(PolicyStatus.RENOVADA);
 
         List<Policy> clientPolicies = policyRepository.findByClientId(originalPolicy.getClient().getId());
         long activeCount = clientPolicies.stream()
-                .filter(p -> p.getStatus() == PolicyStatus.ACTIVE)
+                .filter(p -> p.getStatus() == PolicyStatus.ACTIVA)
                 .count();
 
         long renewedCount = clientPolicies.stream()
-                .filter(p -> p.getStatus() == PolicyStatus.RENEWED)
+                .filter(p -> p.getStatus() == PolicyStatus.RENOVADA)
                 .count();
 
         assertThat(activeCount).isEqualTo(2);
