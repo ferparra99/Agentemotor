@@ -34,9 +34,8 @@ con cualquier otro intermediario.
 | Priorización automática en español (perdido/urgente/alta/media/baja/completada) | Ayuda a María a enfocarse en lo crítico |
 | Creación de póliza con cliente nuevo | María escribe nombre y teléfono; el sistema crea el cliente automáticamente |
 | Edición inline desde el modal | Permite corregir datos de cliente y póliza sin salir de la gestión |
-| Estado de la última gestión visible | Columna "Última gestión" con badge de color (Contactado, No contestó, Dejó mensaje, Interesado, No interesado, No contactado) |
+| Estado de la última gestión visible | Columna "Última gestión" con color (Contactado, No contestó, Dejó mensaje, Interesado, No interesado, No contactado) |
 | Auto-refresh al cerrar modal | La tabla se actualiza sin recargar la página |
-| Constantes centralizadas en `utils/PolicyConstants.java` | Fácil modificación de parámetros de negocio |
 | API REST completa | Permite integración futura |
 | Swagger/OpenAPI disponible en `/swagger-ui.html` | Documentación interactiva de la API |
 | Seed data precargada con escenarios reales | La app funciona desde el primer arranque |
