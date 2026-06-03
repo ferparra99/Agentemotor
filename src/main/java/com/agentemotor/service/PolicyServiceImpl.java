@@ -31,24 +31,40 @@ public class PolicyServiceImpl implements PolicyService {
     private PolicyService self;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<PolicySummaryDTO> getPolicies(Long advisorId, String filter) {
+        updatePolicyStatuses(advisorId);
         List<Policy> policies = filterPolicies(advisorId, filter);
         return policies.stream()
                 .map(this::toSummaryDTO)
                 .toList();
     }
 
-    private List<Policy> filterPolicies(Long advisorId, String filter) {
+    private void updatePolicyStatuses(Long advisorId) {
         LocalDate today = LocalDate.now();
+        LocalDate thirtyDaysAgo = today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS);
+        List<Policy> activeOnes = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVO);
 
+        for (Policy p : activeOnes) {
+            if (p.getExpirationDate().isBefore(thirtyDaysAgo)) {
+                p.setStatus(PolicyStatus.PERDIDO);
+            } else if (p.getExpirationDate().isBefore(today)) {
+                p.setStatus(PolicyStatus.VENCIDO);
+            }
+        }
+        if (!activeOnes.isEmpty()) {
+            policyRepository.saveAll(activeOnes);
+        }
+    }
+
+    private List<Policy> filterPolicies(Long advisorId, String filter) {
         String f = filter != null ? filter.toLowerCase() : "all";
 
         if ("interested".equals(f) || "not_interested".equals(f)) {
             ContactAttemptResult targetResult = "interested".equals(f)
                     ? ContactAttemptResult.INTERESTED
                     : ContactAttemptResult.NOT_INTERESTED;
-            return policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA)
+            return policyRepository.findByAdvisorIdAndStatusIn(advisorId, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO))
                     .stream()
                     .filter(p -> {
                         Optional<ContactAttempt> last = contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(p.getId());
@@ -58,55 +74,39 @@ public class PolicyServiceImpl implements PolicyService {
         }
 
         return switch (f) {
-            case "expiring" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA)
+            case "expiring" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVO)
                     .stream()
-                    .filter(p -> !p.getExpirationDate().isBefore(today)
-                            && !p.getExpirationDate().isAfter(today.plusDays(30)))
+                    .filter(p -> !p.getExpirationDate().isAfter(LocalDate.now().plusDays(30)))
                     .toList();
-            case "expired_lt_30" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA)
-                    .stream()
-                    .filter(p -> p.getExpirationDate().isBefore(today)
-                            && !p.getExpirationDate().isBefore(today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS)))
-                    .toList();
-            case "expired_gt_30" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA)
-                    .stream()
-                    .filter(p -> p.getExpirationDate().isBefore(today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS)))
-                    .toList();
-            case "active" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA);
+            case "expired_lt_30" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.VENCIDO);
+            case "expired_gt_30" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.PERDIDO);
+            case "active" -> policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVO);
             default -> policyRepository.findByAdvisorId(advisorId);
         };
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public DashboardStatsDTO getDashboardStats(Long advisorId) {
-        LocalDate today = LocalDate.now();
-        List<Policy> allActive = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVA);
+        updatePolicyStatuses(advisorId);
 
-        long expiringThisWeek = allActive.stream()
-                .filter(p -> !p.getExpirationDate().isBefore(today)
-                        && !p.getExpirationDate().isAfter(today.plusDays(7)))
-                .count();
-        long expiringThisMonth = allActive.stream()
-                .filter(p -> !p.getExpirationDate().isBefore(today)
-                        && !p.getExpirationDate().isAfter(today.plusDays(30)))
-                .count();
-        long expiredWithin30Days = allActive.stream()
-                .filter(p -> p.getExpirationDate().isBefore(today)
-                        && !p.getExpirationDate().isBefore(today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS)))
-                .count();
-        long expiredBeyond30Days = allActive.stream()
-                .filter(p -> p.getExpirationDate().isBefore(today.minusDays(PolicyConstants.RENEWAL_WINDOW_DAYS)))
-                .count();
+        long totalActive = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVO).size();
+        long expiredWithin30Days = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.VENCIDO).size();
+        long expiredBeyond30Days = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.PERDIDO).size();
         long totalRenewed = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.RENOVADA).size();
 
+        long expiringThisWeek = policyRepository.findByAdvisorIdAndStatus(advisorId, PolicyStatus.ACTIVO)
+                .stream()
+                .filter(p -> !p.getExpirationDate().isAfter(LocalDate.now().plusDays(7)))
+                .count();
+
         return DashboardStatsDTO.builder()
-                .totalActive(allActive.size())
-                .expiringThisWeek(expiringThisWeek)
-                .expiringThisMonth(expiringThisMonth)
-                .expiredWithin30Days(expiredWithin30Days)
-                .expiredBeyond30Days(expiredBeyond30Days)
-                .totalRenewed(totalRenewed)
+                .totalActive((int) totalActive)
+                .expiringThisWeek((int) expiringThisWeek)
+                .expiringThisMonth((int) (totalActive))
+                .expiredWithin30Days((int) expiredWithin30Days)
+                .expiredBeyond30Days((int) expiredBeyond30Days)
+                .totalRenewed((int) totalRenewed)
                 .build();
     }
 
@@ -173,7 +173,7 @@ public class PolicyServiceImpl implements PolicyService {
                 .insurer(oldPolicy.getInsurer())
                 .startDate(request.getNewExpirationDate().minusMonths(12))
                 .expirationDate(request.getNewExpirationDate())
-                .status(PolicyStatus.ACTIVA)
+                .status(PolicyStatus.ACTIVO)
                 .renewalCount(oldPolicy.getRenewalCount() + 1)
                 .client(oldPolicy.getClient())
                 .advisor(oldPolicy.getAdvisor())
@@ -205,7 +205,7 @@ public class PolicyServiceImpl implements PolicyService {
                 .insurer(request.getInsurer())
                 .startDate(request.getStartDate())
                 .expirationDate(request.getExpirationDate())
-                .status(PolicyStatus.ACTIVA)
+                .status(PolicyStatus.ACTIVO)
                 .renewalCount(0)
                 .client(client)
                 .advisor(advisor)
@@ -254,7 +254,7 @@ public class PolicyServiceImpl implements PolicyService {
 
         List<Policy> allPolicies = policyRepository.findByClientId(clientId);
         long activeCount = allPolicies.stream()
-                .filter(p -> p.getStatus() == PolicyStatus.ACTIVA)
+                .filter(p -> p.getStatus() == PolicyStatus.ACTIVO)
                 .count();
 
         return ClientDetailDTO.builder()
@@ -285,13 +285,22 @@ public class PolicyServiceImpl implements PolicyService {
         int attempts = contactAttemptRepository.countByPolicyId(policy.getId());
 
         String interestStatus = null;
+        String lastContactResult = "No contactado";
         Optional<ContactAttempt> lastAttempt = contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(policy.getId());
         if (lastAttempt.isPresent()) {
             ContactAttemptResult r = lastAttempt.get().getResult();
-            if (r == ContactAttemptResult.INTERESTED) {
-                interestStatus = "Interesado";
-            } else if (r == ContactAttemptResult.NOT_INTERESTED) {
-                interestStatus = "No interesado";
+            switch (r) {
+                case CONTACTED -> lastContactResult = "Contactado";
+                case NO_ANSWER -> lastContactResult = "No contestó";
+                case LEFT_MESSAGE -> lastContactResult = "Dejó mensaje";
+                case INTERESTED -> {
+                    lastContactResult = "Interesado";
+                    interestStatus = "Interesado";
+                }
+                case NOT_INTERESTED -> {
+                    lastContactResult = "No interesado";
+                    interestStatus = "No interesado";
+                }
             }
         }
 
@@ -310,6 +319,7 @@ public class PolicyServiceImpl implements PolicyService {
                 .contactAttempts(attempts)
                 .recommendedAction(calculateRecommendedAction(policy, today))
                 .interestStatus(interestStatus)
+                .lastContactResult(lastContactResult)
                 .build();
     }
 
@@ -341,21 +351,16 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     private String calculatePriority(Policy policy, LocalDate today) {
-        if (policy.getStatus() != PolicyStatus.ACTIVA) {
+        if (policy.getStatus() == PolicyStatus.RENOVADA) {
             return PolicyConstants.PRIORITY_COMPLETADA;
         }
-        long daysOverdue = ChronoUnit.DAYS.between(policy.getExpirationDate(), today);
-        long daysUntilExpiry = ChronoUnit.DAYS.between(today, policy.getExpirationDate());
-
-        if (daysOverdue > PolicyConstants.RENEWAL_WINDOW_DAYS) {
+        if (policy.getStatus() == PolicyStatus.PERDIDO) {
             return PolicyConstants.PRIORITY_PERDIDO;
         }
-        if (daysOverdue > PolicyConstants.URGENT_THRESHOLD_DAYS) {
+        if (policy.getStatus() == PolicyStatus.VENCIDO) {
             return PolicyConstants.PRIORITY_URGENTE;
         }
-        if (daysOverdue > 0) {
-            return PolicyConstants.PRIORITY_ALTA;
-        }
+        long daysUntilExpiry = ChronoUnit.DAYS.between(today, policy.getExpirationDate());
         if (daysUntilExpiry <= 7) {
             return PolicyConstants.PRIORITY_ALTA;
         }
@@ -366,15 +371,11 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     private String calculateRecommendedAction(Policy policy, LocalDate today) {
-        if (policy.getStatus() != PolicyStatus.ACTIVA) {
+        if (policy.getStatus() == PolicyStatus.RENOVADA || policy.getStatus() == PolicyStatus.PERDIDO) {
             return PolicyConstants.ACTION_ALREADY_MANAGED;
         }
-        long daysOverdue = ChronoUnit.DAYS.between(policy.getExpirationDate(), today);
-
-        if (daysOverdue > PolicyConstants.RENEWAL_WINDOW_DAYS) {
-            return String.format(PolicyConstants.ACTION_CLIENT_LOST, PolicyConstants.RENEWAL_WINDOW_DAYS);
-        }
-        if (daysOverdue > 0) {
+        if (policy.getStatus() == PolicyStatus.VENCIDO) {
+            long daysOverdue = ChronoUnit.DAYS.between(policy.getExpirationDate(), today);
             long remaining = PolicyConstants.RENEWAL_WINDOW_DAYS - daysOverdue;
             return String.format(PolicyConstants.ACTION_CONTACT_URGENT, PolicyConstants.RENEWAL_WINDOW_DAYS, remaining);
         }

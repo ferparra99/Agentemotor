@@ -14,6 +14,8 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
 
     List<Policy> findByAdvisorIdAndStatus(Long advisorId, PolicyStatus status);
 
+    List<Policy> findByAdvisorIdAndStatusIn(Long advisorId, List<PolicyStatus> statuses);
+
     List<Policy> findByClientId(Long clientId);
 
     List<Policy> findByClientIdAndStatus(Long clientId, PolicyStatus status);

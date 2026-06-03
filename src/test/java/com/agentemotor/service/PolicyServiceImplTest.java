@@ -73,7 +73,7 @@ class PolicyServiceImplTest {
                 .insurer("Seguros Sura")
                 .startDate(LocalDate.now().minusMonths(1))
                 .expirationDate(LocalDate.now().plusMonths(11))
-                .status(PolicyStatus.ACTIVA)
+                .status(PolicyStatus.ACTIVO)
                 .renewalCount(0)
                 .client(testClient)
                 .advisor(defaultAdvisor)
@@ -127,7 +127,7 @@ class PolicyServiceImplTest {
                     .insurer("Mapfre")
                     .startDate(LocalDate.of(2026, 1, 1))
                     .expirationDate(LocalDate.of(2027, 1, 1))
-                    .status(PolicyStatus.ACTIVA)
+                    .status(PolicyStatus.ACTIVO)
                     .renewalCount(0)
                     .client(savedClient)
                     .advisor(defaultAdvisor)
@@ -146,7 +146,7 @@ class PolicyServiceImplTest {
             assertThat(result.getClientPhone()).isEqualTo("+57 300 999 8877");
             assertThat(result.getType()).isEqualTo("AUTO");
             assertThat(result.getInsurer()).isEqualTo("Mapfre");
-            assertThat(result.getStatus()).isEqualTo("ACTIVA");
+            assertThat(result.getStatus()).isEqualTo("ACTIVO");
 
             verify(clientRepository).save(clientCaptor.capture());
             assertThat(clientCaptor.getValue().getName()).isEqualTo("Nuevo Cliente");
@@ -185,7 +185,7 @@ class PolicyServiceImplTest {
                     .insurer("Allianz")
                     .startDate(LocalDate.of(2026, 3, 1))
                     .expirationDate(LocalDate.of(2027, 3, 1))
-                    .status(PolicyStatus.ACTIVA)
+                    .status(PolicyStatus.ACTIVO)
                     .renewalCount(0)
                     .client(savedClient)
                     .advisor(defaultAdvisor)
@@ -439,28 +439,28 @@ class PolicyServiceImplTest {
                     .id(201L).policyNumber("P-INT-001").type(PolicyType.AUTO)
                     .insurer("I1").startDate(LocalDate.now().minusMonths(6))
                     .expirationDate(LocalDate.now().plusMonths(6))
-                    .status(PolicyStatus.ACTIVA).renewalCount(0)
+                    .status(PolicyStatus.ACTIVO).renewalCount(0)
                     .client(c1).advisor(defaultAdvisor).build();
 
             policyWithNoInterest = Policy.builder()
                     .id(202L).policyNumber("P-NINT-001").type(PolicyType.HOGAR)
                     .insurer("I2").startDate(LocalDate.now().minusMonths(6))
                     .expirationDate(LocalDate.now().plusMonths(6))
-                    .status(PolicyStatus.ACTIVA).renewalCount(0)
+                    .status(PolicyStatus.ACTIVO).renewalCount(0)
                     .client(c2).advisor(defaultAdvisor).build();
 
             policyWithContacted = Policy.builder()
                     .id(203L).policyNumber("P-CON-001").type(PolicyType.VIDA)
                     .insurer("I3").startDate(LocalDate.now().minusMonths(6))
                     .expirationDate(LocalDate.now().plusMonths(6))
-                    .status(PolicyStatus.ACTIVA).renewalCount(0)
+                    .status(PolicyStatus.ACTIVO).renewalCount(0)
                     .client(c3).advisor(defaultAdvisor).build();
         }
 
         @Test
         @DisplayName("filter interested returns policies with last attempt = INTERESTED")
         void filterInterested() {
-            when(policyRepository.findByAdvisorIdAndStatus(1L, PolicyStatus.ACTIVA))
+            when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest, policyWithNoInterest, policyWithContacted));
             when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
@@ -485,7 +485,7 @@ class PolicyServiceImplTest {
         @Test
         @DisplayName("filter not_interested returns policies with last attempt = NOT_INTERESTED")
         void filterNotInterested() {
-            when(policyRepository.findByAdvisorIdAndStatus(1L, PolicyStatus.ACTIVA))
+            when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest, policyWithNoInterest, policyWithContacted));
             when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
@@ -510,7 +510,7 @@ class PolicyServiceImplTest {
         @Test
         @DisplayName("filter interested excludes policies with no contact attempts")
         void filterInterested_noAttemptsExcluded() {
-            when(policyRepository.findByAdvisorIdAndStatus(1L, PolicyStatus.ACTIVA))
+            when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest));
             when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
                     .thenReturn(Optional.empty());
@@ -523,7 +523,7 @@ class PolicyServiceImplTest {
         @Test
         @DisplayName("filter not_interested excludes policies with different last result")
         void filterNotInterested_wrongResultExcluded() {
-            when(policyRepository.findByAdvisorIdAndStatus(1L, PolicyStatus.ACTIVA))
+            when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest));
             when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
@@ -542,10 +542,10 @@ class PolicyServiceImplTest {
                     .id(204L).policyNumber("P-INT-002").type(PolicyType.AUTO)
                     .insurer("I4").startDate(LocalDate.now().minusMonths(3))
                     .expirationDate(LocalDate.now().plusMonths(9))
-                    .status(PolicyStatus.ACTIVA).renewalCount(0)
+                    .status(PolicyStatus.ACTIVO).renewalCount(0)
                     .client(testClient).advisor(defaultAdvisor).build();
 
-            when(policyRepository.findByAdvisorIdAndStatus(1L, PolicyStatus.ACTIVA))
+            when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest, policyWithInterest2, policyWithNoInterest));
             when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
@@ -569,22 +569,28 @@ class PolicyServiceImplTest {
         }
 
         @Test
-        @DisplayName("filter interested on expired policy returns empty")
-        void filterInterested_expiredPolicyExcluded() {
+        @DisplayName("filter interested includes VENCIDO policies with INTERESTED attempt")
+        void filterInterested_includesVencioPolicy() {
             Policy expiredPolicy = Policy.builder()
                     .id(205L).policyNumber("P-EXP-001").type(PolicyType.AUTO)
                     .insurer("I5").startDate(LocalDate.now().minusYears(1))
                     .expirationDate(LocalDate.now().minusDays(10))
-                    .status(PolicyStatus.VENCIDA).renewalCount(0)
+                    .status(PolicyStatus.VENCIDO).renewalCount(0)
                     .client(testClient).advisor(defaultAdvisor).build();
 
-            when(policyRepository.findByAdvisorIdAndStatus(1L, PolicyStatus.ACTIVA))
-                    .thenReturn(List.of());
+            when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
+                    .thenReturn(List.of(expiredPolicy));
+            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(205L))
+                    .thenReturn(Optional.of(ContactAttempt.builder()
+                            .id(1L).date(LocalDateTime.now()).type(ContactAttemptType.CALL)
+                            .result(ContactAttemptResult.INTERESTED).build()));
+            when(contactAttemptRepository.countByPolicyId(205L)).thenReturn(1);
 
             List<PolicySummaryDTO> result = policyService.getPolicies(1L, "interested");
 
-            assertThat(result).isEmpty();
-            verify(contactAttemptRepository, never()).findTopByPolicyIdOrderByDateDesc(205L);
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getPolicyNumber()).isEqualTo("P-EXP-001");
+            assertThat(result.get(0).getLastContactResult()).isEqualTo("Interesado");
         }
     }
 }

@@ -34,7 +34,7 @@ con cualquier otro intermediario.
 | Priorización automática en español (perdido/urgente/alta/media/baja/completada) | Ayuda a María a enfocarse en lo crítico |
 | Creación de póliza con cliente nuevo | María escribe nombre y teléfono; el sistema crea el cliente automáticamente |
 | Edición inline desde el modal | Permite corregir datos de cliente y póliza sin salir de la gestión |
-| Estado de interés visible en la tabla | Muestra `[alta] [Interesado]` junto a la prioridad |
+| Estado de la última gestión visible | Columna "Última gestión" con badge de color (Contactado, No contestó, Dejó mensaje, Interesado, No interesado, No contactado) |
 | Auto-refresh al cerrar modal | La tabla se actualiza sin recargar la página |
 | Constantes centralizadas en `utils/PolicyConstants.java` | Fácil modificación de parámetros de negocio |
 | API REST completa | Permite integración futura |
@@ -78,18 +78,17 @@ con cualquier otro intermediario.
 1. María abre `http://localhost:8080/`
 2. Ve las tarjetas de resumen: activas, vencen esta semana, vencidas <30d,
    vencidas >30d, renovadas
-3. La tabla muestra todas las pólizas con prioridad, cliente, vencimiento e
-   indicador de interés (Interesado/No interesado)
+3. La tabla muestra: cliente, póliza, aseguradora, tipo, vencimiento, estado,
+   prioridad, gestiones (conteo) y última gestión (badge con color)
 4. Puede filtrar por estado usando los botones de filtro, incluyendo
-   "Interesados" y "No interesados"
+   "Interesados" y "No interesados" (incluye pólizas VENCIDO y ACTIVO)
 
 ### Flujo 2: Gestión de una póliza
 1. María da clic en "Gestionar" en cualquier póliza
 2. Se abre un modal con detalle completo: cliente, póliza, historial de gestiones
-3. Puede registrar un nuevo intento de contacto (tipo, resultado, notas)
-4. Al cerrar el modal, la tabla se actualiza automáticamente
-5. Si el resultado es "Interesado" o "No interesado", aparece en la columna
-   de prioridad del dashboard
+4. Puede registrar un nuevo intento de contacto (tipo, resultado, notas) en
+   cualquier póliza, independientemente de su estado (ACTIVO, VENCIDO, PERDIDO, RENOVADA)
+5. Al cerrar el modal, la tabla se actualiza automáticamente
 
 ### Flujo 3: Renovación
 1. En el modal de detalle, María da clic en "Renovar póliza"
@@ -135,7 +134,7 @@ Policy
   insurer: String
   start_date: LocalDate
   expiration_date: LocalDate
-  status: Enum [ACTIVA, VENCIDA, RENOVADA]
+  status: Enum [ACTIVO, VENCIDO, PERDIDO, RENOVADA]
   renewal_count: Integer
   client_id: Long (FK → Client)
   advisor_id: Long (FK → Advisor)
@@ -151,17 +150,19 @@ ContactAttempt
 
 ### Prioridades (lógica de negocio)
 
-| Prioridad | Condición |
-|-----------|-----------|
-| perdido | Vencido hace > 30 días |
-| urgente | Vencido hace > 7 días |
-| alta | Vencido hace > 0 días O vence en ≤ 7 días |
-| media | Vence en ≤ 30 días |
-| baja | Vigente, vence en > 30 días |
-| completada | Póliza no activa (VENCIDA o RENOVADA) |
+| Prioridad | Condición (status / días) |
+|-----------|--------------------------|
+| perdido | Status `PERDIDO` (vencido > 30 días) |
+| urgente | Status `VENCIDO` (vencido ≤ 30 días) |
+| alta | Status `ACTIVO` y vence en ≤ 7 días |
+| media | Status `ACTIVO` y vence en ≤ 30 días |
+| baja | Status `ACTIVO` y vence en > 30 días |
+| completada | Status `RENOVADA` |
 
-El campo `interestStatus` en `PolicySummaryDTO` muestra "Interesado" o
-"No interesado" según el último `ContactAttempt` de la póliza.
+El campo `lastContactResult` en `PolicySummaryDTO` muestra el texto en español del
+último `ContactAttempt` de la póliza ("Contactado", "No contestó", "Dejó mensaje",
+"Interesado", "No interesado"), o "No contactado" si no hay intentos. Se visualiza
+como badge de color en la columna "Última gestión" del dashboard.
 
 ## 6. Endpoints Expuestos
 

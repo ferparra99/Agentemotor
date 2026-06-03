@@ -54,7 +54,7 @@ class PolicyServiceTest {
                 .insurer("Test Insurer")
                 .startDate(today.minusMonths(12))
                 .expirationDate(today.minusDays(5))
-                .status(PolicyStatus.ACTIVA)
+                .status(PolicyStatus.ACTIVO)
                 .renewalCount(0)
                 .client(client1)
                 .advisor(advisor)
@@ -67,7 +67,7 @@ class PolicyServiceTest {
                 .insurer("Test Insurer")
                 .startDate(today.minusMonths(13))
                 .expirationDate(today.minusDays(35))
-                .status(PolicyStatus.ACTIVA)
+                .status(PolicyStatus.ACTIVO)
                 .renewalCount(0)
                 .client(client2)
                 .advisor(advisor)
@@ -80,7 +80,7 @@ class PolicyServiceTest {
                 .insurer("Test Insurer")
                 .startDate(today.minusMonths(6))
                 .expirationDate(today.plusDays(60))
-                .status(PolicyStatus.ACTIVA)
+                .status(PolicyStatus.ACTIVO)
                 .renewalCount(0)
                 .client(client1)
                 .advisor(advisor)
@@ -102,7 +102,7 @@ class PolicyServiceTest {
                 .findFirst().orElseThrow();
 
         assertThat(expired5days.getDaysOverdue()).isEqualTo(5);
-        assertThat(expired5days.getPriority()).isEqualTo("alta");
+        assertThat(expired5days.getPriority()).isEqualTo("urgente");
 
         assertThat(expired35days.getDaysOverdue()).isEqualTo(35);
         assertThat(expired35days.getPriority()).isEqualTo("perdido");
@@ -131,7 +131,7 @@ class PolicyServiceTest {
         PolicySummaryDTO renewed = policyService.renewPolicy(policyToRenew.getId(), renewRequest);
 
         assertThat(renewed).isNotNull();
-        assertThat(renewed.getStatus()).isEqualTo("ACTIVA");
+        assertThat(renewed.getStatus()).isEqualTo("ACTIVO");
         assertThat(renewed.getPolicyNumber()).contains("-R1");
 
         Policy originalPolicy = policyRepository.findById(policyToRenew.getId()).orElseThrow();
@@ -139,7 +139,7 @@ class PolicyServiceTest {
 
         List<Policy> clientPolicies = policyRepository.findByClientId(originalPolicy.getClient().getId());
         long activeCount = clientPolicies.stream()
-                .filter(p -> p.getStatus() == PolicyStatus.ACTIVA)
+                .filter(p -> p.getStatus() == PolicyStatus.ACTIVO)
                 .count();
 
         long renewedCount = clientPolicies.stream()

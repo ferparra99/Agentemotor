@@ -18,4 +18,5 @@ public class PolicySummaryDTO {
     private int contactAttempts;
     private String recommendedAction;
     private String interestStatus;
+    private String lastContactResult;
 }

@@ -31,8 +31,8 @@ del proyecto con datos de demostración precargados.
 |---------------|------|
 | Dashboard con resumen y tabla de pólizas | Pantalla principal con tarjetas de estadísticas y tabla filtrable |
 | Filtros por estado | Todas, Vigentes, Por vencer (30d), Vencidas <30d, Perdidas, **Interesados**, **No interesados** |
-| Prioridades en español | perdido, urgente, alta, media, baja, completada |
-| Estado de interés visible | La tabla muestra `[alta] [Interesado]` junto a la prioridad |
+| Prioridades en español | perdido (PERDIDO), urgente (VENCIDO), alta/media/baja (ACTIVO), completada (RENOVADA) |
+| Última gestión por póliza | Columna separada con badge de color: Contactado (verde), No contestó (amarillo), Dejó mensaje (azul), Interesado (naranja), No interesado (gris), No contactado (gris claro) |
 | Creación rápida de póliza | Formulario donde se escribe nombre/teléfono del cliente y se crea automáticamente |
 | Detalle y gestiones | Modal con historial de contactos, registro de nuevo intento |
 | Edición inline | Botón "Editar" en el modal que permite modificar cliente y póliza |
@@ -109,8 +109,13 @@ agentemotor/
    teléfono; el sistema crea el `Client` automáticamente. Sin paso previo de
    registro de cliente.
 
-8. **Estados en español**: `PolicyStatus` usa `ACTIVA`, `VENCIDA`, `RENOVADA`.
-   Coherente con el resto de la UI en español.
+8. **Estados en español**: `PolicyStatus` usa `ACTIVO`, `VENCIDO`, `PERDIDO`, `RENOVADA`.
+   `updatePolicyStatuses()` clasifica automáticamente según la ventana de 30 días.
+
+9. **Última gestión como columna independiente**: La tabla del dashboard separa el
+   conteo de gestiones del resultado de la última gestión (badge con color). El
+   badge de interés (Interesado/No interesado) se eliminó de la columna prioridad
+   y ahora se muestra en la columna "Última gestión" junto con los demás resultados.
 
 ## API REST
 

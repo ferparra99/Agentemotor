@@ -32,7 +32,7 @@ public class Policy {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private PolicyStatus status = PolicyStatus.ACTIVA;
+    private PolicyStatus status = PolicyStatus.ACTIVO;
 
     @Column(nullable = false)
     @Builder.Default

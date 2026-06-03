@@ -31,17 +31,21 @@
         th { background: #f8f9fa; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 600; }
         tr:hover { background: #f8f9ff; }
         .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 600; }
-        .badge.activa { background: #d4edda; color: #155724; }
-        .badge.vencida { background: #f8d7da; color: #721c24; }
+        .badge.activo { background: #d4edda; color: #155724; }
+        .badge.vencido { background: #f8d7da; color: #721c24; }
+        .badge.perdido { background: #343a40; color: white; }
         .badge.renovada { background: #cce5ff; color: #004085; }
         .badge.baja { background: #e2e3e5; color: #383d41; }
         .badge.media { background: #fff3cd; color: #856404; }
         .badge.alta { background: #f8d7da; color: #721c24; }
         .badge.urgente { background: #f5c6cb; color: #721c24; font-weight: 700; }
-        .badge.perdido { background: #343a40; color: white; }
         .badge.completada { background: #d4edda; color: #155724; }
         .badge.interesado { background: #fdb953; color: #614500; }
         .badge.no-interesado { background: #e2e3e5; color: #383d41; }
+        .badge.contactado { background: #d4edda; color: #155724; }
+        .badge.no-contesto { background: #fff3cd; color: #856404; }
+        .badge.dejo-mensaje { background: #cce5ff; color: #004085; }
+        .badge.no-contactado { background: #f0f0f0; color: #6c757d; }
         .btn { display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 0.8em; font-weight: 500; cursor: pointer; border: none; text-decoration: none; transition: all 0.2s; }
         .btn-primary { background: #4361ee; color: white; }
         .btn-primary:hover { background: #3a56d4; }
@@ -150,6 +154,7 @@
                 <th>Estado</th>
                 <th>Prioridad</th>
                 <th>Gestiones</th>
+                <th>Última gestión</th>
                 <th></th>
             </tr>
         </thead>
@@ -169,15 +174,17 @@
                 <td><span class="badge" th:classappend="${p.status.toLowerCase()}" th:text="${p.status}"></span></td>
                 <td>
                     <span class="badge" th:classappend="${p.priority}" th:text="${p.priority}"></span>
-                    <span th:if="${p.interestStatus}" class="badge" th:classappend="${#strings.toLowerCase(p.interestStatus).replace(' ', '-')}" style="margin-left:4px;text-transform:none;" th:text="${p.interestStatus}"></span>
                 </td>
                 <td class="text-center" th:text="${p.contactAttempts}">0</td>
+                <td>
+                    <span class="badge" th:classappend="${#strings.toLowerCase(p.lastContactResult).replace(' ', '-')}" th:text="${p.lastContactResult}">No contactado</span>
+                </td>
                 <td>
                     <button class="btn btn-primary" th:attr="data-policy-id=${p.id}" onclick="openDetail(this.dataset.policyId)">Gestionar</button>
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(policies)}">
-                <td colspan="9" class="empty-state">No hay pólizas que mostrar en este filtro.</td>
+                <td colspan="10" class="empty-state">No hay pólizas que mostrar en este filtro.</td>
             </tr>
         </tbody>
     </table>
@@ -237,7 +244,7 @@
         currentDetail = d;
         isEditMode = false;
         document.getElementById('editToggleBtn').textContent = 'Editar';
-        const actionsHtml = d.status === 'ACTIVA' ? `
+        const actionsHtml = `
             <div id="editActions" style="display:none;" class="mt-12">
                 <button class="btn btn-success" onclick="saveEdits()">Guardar cambios</button>
                 <button class="btn btn-secondary" onclick="exitEditMode()" style="margin-left:4px;">Cancelar</button>
@@ -272,7 +279,7 @@
                     <button class="btn btn-secondary" onclick="hideRenewForm()" style="margin-left:4px;">Cancelar</button>
                 </div>
             </div>
-        ` : '<p class="text-muted">Póliza ya gestionada. No se requieren acciones.</p>';
+        `;
 
         const attemptsHtml = d.contactAttemptList && d.contactAttemptList.length > 0
             ? d.contactAttemptList.map(a => `
@@ -409,7 +416,7 @@
     }
 
     function enterEditMode() {
-        if (!currentDetail || currentDetail.status !== 'ACTIVA') return;
+        if (!currentDetail) return;
         isEditMode = true;
         document.getElementById('editToggleBtn').textContent = 'Cancelar';
         document.getElementById('editIndicator').style.display = 'block';
