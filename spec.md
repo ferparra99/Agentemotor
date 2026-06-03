@@ -2,13 +2,23 @@
 
 ## 1. Entendimiento del Problema
 
-María, una asesora de seguros con 280 clientes activos, usa un Excel para gestionar las pólizas de su cartera. Cada lunes filtra las pólizas que vencen ese mes, llama cliente por cliente, marca una columna "gestionado" con una X, y cuando renuevan actualiza la fecha. Su flujo tiene problemas concretos:
+María, una asesora de seguros con 280 clientes activos, usa un Excel para gestionar
+las pólizas de su cartera. Cada lunes filtra las pólizas que vencen ese mes, llama
+cliente por cliente, marca una columna "gestionado" con una X, y cuando renuevan
+actualiza la fecha. Su flujo tiene problemas concretos:
 
-- **El Excel se daña, se duplica, se pierde contexto** — no hay un registro histórico confiable.
-- **Pérdida de clientes por vencimientos no detectados** — 5 a 10 clientes al mes se van con otro asesor porque María no identificó a tiempo que una póliza había vencido.
-- **Sin trazabilidad** — no queda registro de qué se le ofreció a cada cliente ni cuándo se contactó.
+- **El Excel se daña, se duplica, se pierde contexto** — no hay un registro
+  histórico confiable.
+- **Pérdida de clientes por vencimientos no detectados** — 5 a 10 clientes al mes
+  se van con otro asesor porque María no identificó a tiempo que una póliza había
+  vencido.
+- **Sin trazabilidad** — no queda registro de qué se le ofreció a cada cliente ni
+  cuándo se contactó.
 
-**Contexto regulatorio crítico**: En Colombia, las pólizas de auto tienen una ventana de 30 días post-vencimiento para renovar sin perder el historial. Pasados los 30 días, la renovación se trata como nueva contratación y el asesor compite con cualquier otro intermediario.
+**Contexto regulatorio crítico**: En Colombia, las pólizas de auto tienen una
+ventana de 30 días post-vencimiento para renovar sin perder el historial. Pasados
+los 30 días, la renovación se trata como nueva contratación y el asesor compite
+con cualquier otro intermediario.
 
 ## 2. Decisiones de Construcción
 
@@ -17,22 +27,27 @@ María, una asesora de seguros con 280 clientes activos, usa un Excel para gesti
 | Funcionalidad | Justificación |
 |---|---|
 | Dashboard con resumen de pólizas por estado | Reemplaza la vista principal del Excel de María |
-| Filtros: todas, vigentes, por vencer, vencidas <30d, vencidas >30d | Refleja la ventana regulatoria de 30 días |
+| Filtros: todas, vigentes, por vencer, vencidas <30d, vencidas >30d, **Interesados**, **No interesados** | Refleja la ventana regulatoria + permite segmentar por intención de compra |
 | Vista detalle de póliza con historial de gestiones | Reemplaza la columna "gestionado" del Excel |
 | Registro de intentos de contacto (tipo, resultado, notas) | Da trazabilidad a las acciones de María |
 | Acción de renovar póliza con nueva fecha | Reemplaza la actualización manual en el Excel |
-| Priorización automática (low/medium/high/urgent/lost) | Ayuda a María a enfocarse en lo crítico |
-| Seed data precargada con escenarios reales | La app funciona desde el primer arranque |
+| Priorización automática en español (perdido/urgente/alta/media/baja/completada) | Ayuda a María a enfocarse en lo crítico |
+| Creación de póliza con cliente nuevo | María escribe nombre y teléfono; el sistema crea el cliente automáticamente |
+| Edición inline desde el modal | Permite corregir datos de cliente y póliza sin salir de la gestión |
+| Estado de interés visible en la tabla | Muestra `[alta] [Interesado]` junto a la prioridad |
+| Auto-refresh al cerrar modal | La tabla se actualiza sin recargar la página |
+| Constantes centralizadas en `utils/PolicyConstants.java` | Fácil modificación de parámetros de negocio |
 | API REST completa | Permite integración futura |
-| Swagger/OpenAPI disponible en /swagger-ui.html | Documentación interactiva de la API |
-| 3 tests del caso más crítico (ventana 30 días, renovación, registro de gestión) | Validación del core business |
+| Swagger/OpenAPI disponible en `/swagger-ui.html` | Documentación interactiva de la API |
+| Seed data precargada con escenarios reales | La app funciona desde el primer arranque |
+| 21 tests (3 integración + 17 unitarios + 1 context) | Validación del core business y nuevas funcionalidades |
 
 ### No Construido (y por qué)
 
 | Funcionalidad | Razón |
 |---|---|
 | Autenticación de usuarios | Prueba de concepto con un solo asesor. Aporta fricción sin valor para el alcance |
-| Multi-asesor | María es la única usuaria. El ID del asesor está hardcodeado |
+| Multi-asesor | María es la única usuaria. El ID del asesor está en `PolicyConstants.DEFAULT_ADVISOR_ID` |
 | Notificaciones automáticas (email, WhatsApp) | Excede el tiempo estimado. Se reemplaza con la priorización visual |
 | Reportes y estadísticas avanzadas | María necesita gestionar, no analizar. El dashboard básico es suficiente |
 | Roles y permisos | No hay multi-usuario |
@@ -41,32 +56,60 @@ María, una asesora de seguros con 280 clientes activos, usa un Excel para gesti
 
 ## 3. Supuestos
 
-1. **María es la asesora por defecto** — ID = 1, sin login. En producción se agregaría autenticación.
-2. **Una renovación crea una nueva póliza** — La original pasa a estado RENEWED y se crea una nueva ACTIVE con la fecha extendida, manteniendo el historial completo.
-3. **La ventana de 30 días aplica a todos los tipos de póliza** aunque el contexto regulatorio menciona específicamente autos. El sistema es genérico.
-4. **Las aseguradoras son texto libre** — no hay tabla maestra de aseguradoras. Suficiente para el MVP.
-5. **Los contactos se registran con timestamp automático** — la asesora no necesita ingresar la fecha manualmente.
-6. **La base de datos SQLite se crea en el directorio de trabajo** — `agentemotor.db` aparece junto al JAR.
+1. **María es la asesora por defecto** — ID = `PolicyConstants.DEFAULT_ADVISOR_ID` (1L).
+   Sin login. En producción se agregaría autenticación.
+2. **Una renovación crea una nueva póliza** — La original pasa a estado `RENOVADA`
+   y se crea una nueva `ACTIVA` con la fecha extendida, manteniendo el historial
+   completo.
+3. **La ventana de 30 días aplica a todos los tipos de póliza** aunque el contexto
+   regulatorio menciona específicamente autos. El sistema es genérico.
+4. **Las aseguradoras son texto libre** — no hay tabla maestra de aseguradoras.
+   Suficiente para el MVP.
+5. **Los contactos se registran con timestamp automático** — la asesora no necesita
+   ingresar la fecha manualmente.
+6. **La base de datos SQLite se crea en el directorio de trabajo** — `agentemotor.db`
+   aparece junto al JAR.
+7. **Los valores de enum se almacenan como string en SQLite** — cambiarlos (ej:
+   `ACTIVE` → `ACTIVA`) requiere borrar `agentemotor.db` para regenerar.
 
 ## 4. Flujos Principales
 
 ### Flujo 1: Dashboard diario
 1. María abre `http://localhost:8080/`
-2. Ve las tarjetas de resumen: activas, vencen esta semana, vencidas <30d, vencidas >30d, renovadas
-3. La tabla muestra todas las pólizas con prioridad, cliente, vencimiento
-4. Puede filtrar por estado usando los botones de filtro
+2. Ve las tarjetas de resumen: activas, vencen esta semana, vencidas <30d,
+   vencidas >30d, renovadas
+3. La tabla muestra todas las pólizas con prioridad, cliente, vencimiento e
+   indicador de interés (Interesado/No interesado)
+4. Puede filtrar por estado usando los botones de filtro, incluyendo
+   "Interesados" y "No interesados"
 
 ### Flujo 2: Gestión de una póliza
 1. María da clic en "Gestionar" en cualquier póliza
 2. Se abre un modal con detalle completo: cliente, póliza, historial de gestiones
 3. Puede registrar un nuevo intento de contacto (tipo, resultado, notas)
-4. El historial se actualiza en tiempo real
+4. Al cerrar el modal, la tabla se actualiza automáticamente
+5. Si el resultado es "Interesado" o "No interesado", aparece en la columna
+   de prioridad del dashboard
 
 ### Flujo 3: Renovación
 1. En el modal de detalle, María da clic en "Renovar póliza"
 2. Ingresa la nueva fecha de vencimiento
-3. El sistema marca la póliza original como RENEWED y crea una nueva ACTIVE
-4. El dashboard se actualiza
+3. El sistema marca la póliza original como `RENOVADA` y crea una nueva `ACTIVA`
+4. Al cerrar el modal, el dashboard se actualiza
+
+### Flujo 4: Crear póliza con cliente nuevo
+1. María da clic en "+ Nueva Póliza"
+2. Completa: nombre del cliente, teléfono, número de póliza, tipo, aseguradora,
+   fechas de inicio y vencimiento
+3. El sistema crea el cliente automáticamente y luego la póliza
+4. Es redirigida al dashboard con los datos actualizados
+
+### Flujo 5: Editar campos desde el modal
+1. En el modal de detalle, María da clic en "Editar"
+2. Los campos de cliente (nombre, teléfono) y póliza (número, tipo, aseguradora,
+   vencimiento) se vuelven editables
+3. Modifica los datos y da clic en "Guardar cambios"
+4. El modal se actualiza y el dashboard refleja los cambios
 
 ## 5. Modelo de Datos
 
@@ -92,7 +135,7 @@ Policy
   insurer: String
   start_date: LocalDate
   expiration_date: LocalDate
-  status: Enum [ACTIVE, EXPIRED, RENEWED]
+  status: Enum [ACTIVA, VENCIDA, RENOVADA]
   renewal_count: Integer
   client_id: Long (FK → Client)
   advisor_id: Long (FK → Advisor)
@@ -106,28 +149,69 @@ ContactAttempt
   policy_id: Long (FK → Policy)
 ```
 
+### Prioridades (lógica de negocio)
+
+| Prioridad | Condición |
+|-----------|-----------|
+| perdido | Vencido hace > 30 días |
+| urgente | Vencido hace > 7 días |
+| alta | Vencido hace > 0 días O vence en ≤ 7 días |
+| media | Vence en ≤ 30 días |
+| baja | Vigente, vence en > 30 días |
+| completada | Póliza no activa (VENCIDA o RENOVADA) |
+
+El campo `interestStatus` en `PolicySummaryDTO` muestra "Interesado" o
+"No interesado" según el último `ContactAttempt` de la póliza.
+
 ## 6. Endpoints Expuestos
 
-| Método | Ruta | Parámetros | Respuesta |
-|---|---|---|---|
-| GET | `/` | `?filter=all|active|expiring|expired_lt_30|expired_gt_30` | HTML (Thymeleaf) |
-| GET | `/policy/{id}` | — | JSON (detalle póliza) |
-| GET | `/api/policies` | `advisorId`, `filter` | JSON Lista |
-| GET | `/api/policies/{id}` | — | JSON Detalle |
-| PUT | `/api/policies/{id}/renew` | `{"newExpirationDate":"..."}` | JSON Póliza renovada |
-| POST | `/api/contact-attempts` | `{"policyId","type","result","notes"}` | JSON |
-| GET | `/api/clients/{id}` | — | JSON |
-| GET | `/api/stats` | `advisorId` | JSON Dashboard |
-| GET | `/swagger-ui.html` | — | OpenAPI UI |
+### Thymeleaf (HTML)
+
+| Método | Ruta | Parámetros | Descripción |
+|--------|------|-------------|-------------|
+| GET | `/` | `?filter=all\|active\|expiring\|expired_lt_30\|expired_gt_30\|interested\|not_interested` | Dashboard |
+| GET | `/policy/{id}` | — | Detalle de póliza (JSON) |
+| GET | `/policy/nueva` | — | Formulario crear póliza |
+
+### REST API (JSON)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/policies?advisorId=1&filter=all` | Listar pólizas |
+| GET | `/api/policies/{id}` | Detalle de póliza |
+| POST | `/api/policies` | Crear póliza (con cliente nuevo) |
+| PUT | `/api/policies/{id}` | Editar campos de póliza |
+| PUT | `/api/policies/{id}/renew` | Renovar póliza |
+| POST | `/api/contact-attempts` | Registrar gestión |
+| GET | `/api/clients?advisorId=1` | Listar clientes |
+| GET | `/api/clients/{id}` | Detalle de cliente |
+| PUT | `/api/clients/{id}` | Editar campos de cliente |
+| GET | `/api/stats?advisorId=1` | Estadísticas del dashboard |
+| GET | `/swagger-ui.html` | OpenAPI UI |
 
 ## 7. Trade-offs Considerados
 
-1. **SQLite vs PostgreSQL/MySQL**: SQLite es el requisito de la prueba. En producción con multi-asesor y concurrencia real, migraríamos a PostgreSQL.
+1. **SQLite vs PostgreSQL/MySQL**: SQLite es el requisito de la prueba. En
+   producción con multi-asesor y concurrencia real, migraríamos a PostgreSQL.
 
-2. **JPA con SQLite vs JDBC puro**: JPA con el dialecto comunitario de Hibernate 6 funciona pero tiene limitaciones (no soporta `FOR UPDATE`, constraints reales). Para un MVP es aceptable.
+2. **JPA con SQLite vs JDBC puro**: JPA con el dialecto comunitario de Hibernate 6
+   funciona pero tiene limitaciones (no soporta `FOR UPDATE`, constraints reales).
+   Para un MVP es aceptable.
 
-3. **Thymeleaf vs React/Vue**: Thymeleaf permite tener todo en un solo proyecto Spring Boot, sin build steps, sin CORS. React sería más apropiado para una app real con mejor UX, pero agrega complejidad innecesaria para esta prueba.
+3. **Thymeleaf vs React/Vue**: Thymeleaf permite tener todo en un solo proyecto
+   Spring Boot, sin build steps, sin CORS. React sería más apropiado para una app
+   real con mejor UX, pero agrega complejidad innecesaria para esta prueba.
 
-4. **Renovación como nueva póliza vs update in-place**: Crear una nueva póliza preserva el historial completo. Update in-place perdería la trazabilidad.
+4. **Renovación como nueva póliza vs update in-place**: Crear una nueva póliza
+   preserva el historial completo. Update in-place perdería la trazabilidad.
 
-5. **Seed data con INSERT OR IGNORE**: Permite que la app arranque siempre con datos de demostración sin importar cuántas veces se reinicie.
+5. **Seed data con INSERT OR IGNORE**: Permite que la app arranque siempre con
+   datos de demostración sin importar cuántas veces se reinicie.
+
+6. **Auto-inyección `@Lazy self`**: Para que métodos `@Transactional` puedan
+   llamar a otros métodos transaccionales del mismo respetando el proxy de Spring.
+   Los tests usan `ReflectionTestUtils.setField()` para inyectar `self`.
+
+7. **Mockito + ReflectionTestUtils**: Los tests unitarios evitan levantar el
+   contexto de Spring para velocidad. `self` se inyecta manualmente con
+   `ReflectionTestUtils` para que las auto-llamadas transaccionales funcionen.
