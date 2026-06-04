@@ -1,6 +1,7 @@
 package com.agentemotor.service;
 
 import com.agentemotor.dto.*;
+import com.agentemotor.model.Client;
 import java.util.List;
 
 public interface PolicyService {
@@ -14,4 +15,5 @@ public interface PolicyService {
     ClientDetailDTO updateClient(Long clientId, ClientDetailDTO clientData);
     ClientDetailDTO getClientDetail(Long clientId);
     List<ClientDetailDTO> getAllClients(Long advisorId);
+    Client findOrCreateClient(String name, String phone, String email, String notes, Long advisorId);
 }

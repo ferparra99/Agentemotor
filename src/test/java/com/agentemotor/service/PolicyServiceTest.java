@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -180,5 +181,51 @@ class PolicyServiceTest {
                 .findFirst().orElseThrow();
 
         assertThat(updated.getContactAttempts()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Renewal of expired AUTO within 30 days is allowed")
+    void testRenewal_autoExpiredWithinWindow() {
+        List<PolicySummaryDTO> allPolicies = policyService.getPolicies(advisorId, "all");
+
+        PolicySummaryDTO target = allPolicies.stream()
+                .filter(p -> p.getPolicyNumber().equals("AUTO-TEST-001"))
+                .findFirst().orElseThrow();
+
+        RenewRequestDTO request = new RenewRequestDTO();
+        request.setNewExpirationDate(LocalDate.now().plusYears(1));
+
+        PolicySummaryDTO result = policyService.renewPolicy(target.getId(), request);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getStatus()).isEqualTo("ACTIVO");
+    }
+
+    @Test
+    @DisplayName("Renewal of expired non-AUTO policy throws exception")
+    void testRenewal_nonAutoExpired() {
+        Advisor advisor = advisorRepository.findById(advisorId).orElseThrow();
+        Client client = clientRepository.findByAdvisorId(advisorId).get(0);
+
+        Policy nonAutoPolicy = policyRepository.save(Policy.builder()
+                .policyNumber("HOGAR-EXP-INT-001")
+                .type(PolicyType.HOGAR)
+                .insurer("Test Insurer")
+                .startDate(LocalDate.now().minusMonths(12))
+                .expirationDate(LocalDate.now().minusDays(5))
+                .status(PolicyStatus.ACTIVO)
+                .renewalCount(0)
+                .client(client)
+                .advisor(advisor)
+                .build());
+
+        policyService.getPolicies(advisorId, "all");
+
+        RenewRequestDTO request = new RenewRequestDTO();
+        request.setNewExpirationDate(LocalDate.now().plusYears(1));
+
+        assertThatThrownBy(() -> policyService.renewPolicy(nonAutoPolicy.getId(), request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Solo las pólizas de AUTO");
     }
 }

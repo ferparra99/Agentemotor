@@ -133,6 +133,8 @@ class PolicyServiceImplTest {
                     .advisor(defaultAdvisor)
                     .build();
 
+            when(clientRepository.findByAdvisorIdAndNameAndPhone(anyLong(), anyString(), anyString()))
+                    .thenReturn(Optional.empty());
             when(advisorRepository.findById(1L)).thenReturn(Optional.of(defaultAdvisor));
             when(clientRepository.save(any(Client.class))).thenReturn(savedClient);
             when(policyRepository.save(any(Policy.class))).thenReturn(savedPolicy);
@@ -191,6 +193,8 @@ class PolicyServiceImplTest {
                     .advisor(defaultAdvisor)
                     .build();
 
+            when(clientRepository.findByAdvisorIdAndNameAndPhone(anyLong(), anyString(), anyString()))
+                    .thenReturn(Optional.empty());
             when(advisorRepository.findById(1L)).thenReturn(Optional.of(defaultAdvisor));
             when(clientRepository.save(any(Client.class))).thenReturn(savedClient);
             when(policyRepository.save(any(Policy.class))).thenReturn(savedPolicy);
@@ -591,6 +595,223 @@ class PolicyServiceImplTest {
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getPolicyNumber()).isEqualTo("P-EXP-001");
             assertThat(result.get(0).getLastContactResult()).isEqualTo("Interesado");
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    //  renewPolicy() with validation
+    // ──────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("renewPolicy() validation")
+    class RenewPolicyValidationTests {
+
+        @Test
+        @DisplayName("allows renewal of AUTO policy expired within 30 days")
+        void renewPolicy_autoExpiredWithinWindow() {
+            Policy expiredAuto = Policy.builder()
+                    .id(300L)
+                    .policyNumber("AUTO-EXP-001")
+                    .type(PolicyType.AUTO)
+                    .insurer("Sura")
+                    .startDate(LocalDate.now().minusYears(1))
+                    .expirationDate(LocalDate.now().minusDays(5))
+                    .status(PolicyStatus.VENCIDO)
+                    .renewalCount(0)
+                    .client(testClient)
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            Policy savedOld = Policy.builder()
+                    .id(300L)
+                    .policyNumber("AUTO-EXP-001")
+                    .type(PolicyType.AUTO)
+                    .insurer("Sura")
+                    .startDate(LocalDate.now().minusYears(1))
+                    .expirationDate(LocalDate.now().minusDays(5))
+                    .status(PolicyStatus.RENOVADA)
+                    .renewalCount(0)
+                    .client(testClient)
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            Policy newPolicy = Policy.builder()
+                    .id(301L)
+                    .policyNumber("AUTO-EXP-001-R1")
+                    .type(PolicyType.AUTO)
+                    .insurer("Sura")
+                    .startDate(LocalDate.now().minusYears(1).plusMonths(12))
+                    .expirationDate(LocalDate.now().plusYears(1))
+                    .status(PolicyStatus.ACTIVO)
+                    .renewalCount(1)
+                    .client(testClient)
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            RenewRequestDTO request = new RenewRequestDTO();
+            request.setNewExpirationDate(LocalDate.now().plusYears(1));
+
+            when(policyRepository.findById(300L)).thenReturn(Optional.of(expiredAuto));
+            when(policyRepository.save(any(Policy.class)))
+                    .thenReturn(savedOld)
+                    .thenReturn(newPolicy);
+            when(contactAttemptRepository.countByPolicyId(301L)).thenReturn(0);
+
+            PolicySummaryDTO result = policyService.renewPolicy(300L, request);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getStatus()).isEqualTo("ACTIVO");
+        }
+
+        @Test
+        @DisplayName("rejects renewal of non-AUTO policy expired within 30 days")
+        void renewPolicy_nonAutoExpired() {
+            Policy expiredHogar = Policy.builder()
+                    .id(301L)
+                    .policyNumber("HOGAR-EXP-001")
+                    .type(PolicyType.HOGAR)
+                    .insurer("Sura")
+                    .startDate(LocalDate.now().minusYears(1))
+                    .expirationDate(LocalDate.now().minusDays(5))
+                    .status(PolicyStatus.VENCIDO)
+                    .renewalCount(0)
+                    .client(testClient)
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            RenewRequestDTO request = new RenewRequestDTO();
+            request.setNewExpirationDate(LocalDate.now().plusYears(1));
+
+            when(policyRepository.findById(301L)).thenReturn(Optional.of(expiredHogar));
+
+            assertThatThrownBy(() -> policyService.renewPolicy(301L, request))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Solo las pólizas de AUTO");
+        }
+
+        @Test
+        @DisplayName("rejects renewal of AUTO policy expired beyond 30 days")
+        void renewPolicy_autoExpiredBeyondWindow() {
+            Policy expiredAuto = Policy.builder()
+                    .id(302L)
+                    .policyNumber("AUTO-EXP-002")
+                    .type(PolicyType.AUTO)
+                    .insurer("Sura")
+                    .startDate(LocalDate.now().minusYears(1).minusMonths(1))
+                    .expirationDate(LocalDate.now().minusDays(35))
+                    .status(PolicyStatus.VENCIDO)
+                    .renewalCount(0)
+                    .client(testClient)
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            RenewRequestDTO request = new RenewRequestDTO();
+            request.setNewExpirationDate(LocalDate.now().plusYears(1));
+
+            when(policyRepository.findById(302L)).thenReturn(Optional.of(expiredAuto));
+
+            assertThatThrownBy(() -> policyService.renewPolicy(302L, request))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("ventana de renovación");
+        }
+
+        @Test
+        @DisplayName("allows renewal of non-expired policy of any type")
+        void renewPolicy_activeAnyType() {
+            Policy activeHogar = Policy.builder()
+                    .id(303L)
+                    .policyNumber("HOGAR-ACT-001")
+                    .type(PolicyType.HOGAR)
+                    .insurer("Sura")
+                    .startDate(LocalDate.now().minusMonths(6))
+                    .expirationDate(LocalDate.now().plusMonths(6))
+                    .status(PolicyStatus.ACTIVO)
+                    .renewalCount(0)
+                    .client(testClient)
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            Policy savedOld = Policy.builder()
+                    .id(303L)
+                    .policyNumber("HOGAR-ACT-001")
+                    .type(PolicyType.HOGAR)
+                    .insurer("Sura")
+                    .startDate(LocalDate.now().minusMonths(6))
+                    .expirationDate(LocalDate.now().plusMonths(6))
+                    .status(PolicyStatus.RENOVADA)
+                    .renewalCount(0)
+                    .client(testClient)
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            Policy newPolicy = Policy.builder()
+                    .id(304L)
+                    .policyNumber("HOGAR-ACT-001-R1")
+                    .type(PolicyType.HOGAR)
+                    .insurer("Sura")
+                    .startDate(LocalDate.now().minusMonths(6).plusMonths(12))
+                    .expirationDate(LocalDate.now().plusYears(1))
+                    .status(PolicyStatus.ACTIVO)
+                    .renewalCount(1)
+                    .client(testClient)
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            RenewRequestDTO request = new RenewRequestDTO();
+            request.setNewExpirationDate(LocalDate.now().plusYears(1));
+
+            when(policyRepository.findById(303L)).thenReturn(Optional.of(activeHogar));
+            when(policyRepository.save(any(Policy.class)))
+                    .thenReturn(savedOld)
+                    .thenReturn(newPolicy);
+            when(contactAttemptRepository.countByPolicyId(304L)).thenReturn(0);
+
+            PolicySummaryDTO result = policyService.renewPolicy(303L, request);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getStatus()).isEqualTo("ACTIVO");
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    //  findOrCreateClient()
+    // ──────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("findOrCreateClient()")
+    class FindOrCreateClientTests {
+
+        @Test
+        @DisplayName("returns existing client when found by name and phone")
+        void findOrCreateClient_returnsExisting() {
+            when(clientRepository.findByAdvisorIdAndNameAndPhone(1L, "Juan Pérez", "+57 310 111 2233"))
+                    .thenReturn(Optional.of(testClient));
+
+            Client result = policyService.findOrCreateClient("Juan Pérez", "+57 310 111 2233", null, null, 1L);
+
+            assertThat(result).isSameAs(testClient);
+            verify(clientRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("creates new client when not found")
+        void findOrCreateClient_createsNew() {
+            Client newClient = Client.builder()
+                    .id(99L)
+                    .name("Nuevo Cliente")
+                    .phone("+57 300 999 8877")
+                    .advisor(defaultAdvisor)
+                    .build();
+
+            when(clientRepository.findByAdvisorIdAndNameAndPhone(1L, "Nuevo Cliente", "+57 300 999 8877"))
+                    .thenReturn(Optional.empty());
+            when(advisorRepository.findById(1L)).thenReturn(Optional.of(defaultAdvisor));
+            when(clientRepository.save(any(Client.class))).thenReturn(newClient);
+
+            Client result = policyService.findOrCreateClient("Nuevo Cliente", "+57 300 999 8877", null, null, 1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getName()).isEqualTo("Nuevo Cliente");
         }
     }
 }

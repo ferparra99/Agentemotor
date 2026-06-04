@@ -1,10 +1,14 @@
 package com.agentemotor.controller;
 
 import com.agentemotor.dto.*;
+import com.agentemotor.service.ImportService;
 import com.agentemotor.service.PolicyService;
+import com.agentemotor.utils.PolicyConstants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -14,6 +18,7 @@ import java.util.List;
 public class PolicyRestController {
 
     private final PolicyService policyService;
+    private final ImportService importService;
 
     @GetMapping("/policies")
     public ResponseEntity<List<PolicySummaryDTO>> listPolicies(
@@ -69,5 +74,12 @@ public class PolicyRestController {
     @GetMapping("/stats")
     public ResponseEntity<DashboardStatsDTO> getStats(@RequestParam Long advisorId) {
         return ResponseEntity.ok(policyService.getDashboardStats(advisorId));
+    }
+
+    @PostMapping(value = "/import/clients", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImportResultDTO> importClients(
+            @RequestParam("file") MultipartFile file) {
+        ImportResultDTO result = importService.importClients(file, PolicyConstants.DEFAULT_ADVISOR_ID);
+        return ResponseEntity.ok(result);
     }
 }

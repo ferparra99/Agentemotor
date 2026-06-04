@@ -24,4 +24,12 @@ public final class PolicyConstants {
     public static final String ACTION_CLIENT_LOST = "Cliente perdido — fuera de ventana de renovación de %d días. Contactar para nueva contratación.";
     public static final String ACTION_CONTACT_URGENT = "Contactar urgentemente — ventana de renovación de %d días. Quedan %d días.";
     public static final String ACTION_BEFORE_EXPIRY = "Gestionar renovación antes del vencimiento.";
+
+    public static final String ERROR_RENEW_NOT_AUTO = "Solo las pólizas de AUTO pueden renovarse después del vencimiento.";
+    public static final String ERROR_RENEW_WINDOW_EXPIRED = "La ventana de renovación de %d días después del vencimiento ha expirado.";
+    public static final String ERROR_IMPORT_EMPTY = "El archivo está vacío o no contiene datos válidos.";
+    public static final String ERROR_IMPORT_UNSUPPORTED = "Formato de archivo no soportado. Use .xlsx o .xml.";
+    public static final String ERROR_IMPORT_INVALID_ROW = "Fila %d: datos inválidos - %s";
+    public static final String ERROR_IMPORT_INVALID_TYPE = "Tipo de póliza inválido en fila %d: %s";
+    public static final String INFO_IMPORT_RESULT = "Importación completada. %d procesados, %d creados, %d errores.";
 }

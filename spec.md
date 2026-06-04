@@ -36,10 +36,14 @@ con cualquier otro intermediario.
 | Edición inline desde el modal | Permite corregir datos de cliente y póliza sin salir de la gestión |
 | Estado de la última gestión visible | Columna "Última gestión" con color (Contactado, No contestó, Dejó mensaje, Interesado, No interesado, No contactado) |
 | Auto-refresh al cerrar modal | La tabla se actualiza sin recargar la página |
+| Botón "Refrescar" en dashboard | Recarga la página manteniendo el filtro activo |
 | API REST completa | Permite integración futura |
 | Swagger/OpenAPI disponible en `/swagger-ui.html` | Documentación interactiva de la API |
 | Seed data precargada con escenarios reales | La app funciona desde el primer arranque |
-| 21 tests (3 integración + 17 unitarios + 1 context) | Validación del core business y nuevas funcionalidades |
+| Importación masiva desde Excel (.xlsx) y XML | Reemplaza la migración manual de datos desde Excel |
+| Validación de renovación (solo AUTO post-vencimiento, máx 30 días) | Refleja la ventana regulatoria colombiana |
+| Logging estructurado con SLF4J | Trazabilidad de operaciones en servidor |
+| 23 tests (5 integración + 17 unitarios + 1 context) | Validación del core business y nuevas funcionalidades |
 
 ### No Construido (y por qué)
 
@@ -50,7 +54,6 @@ con cualquier otro intermediario.
 | Notificaciones automáticas (email, WhatsApp) | Excede el tiempo estimado. Se reemplaza con la priorización visual |
 | Reportes y estadísticas avanzadas | María necesita gestionar, no analizar. El dashboard básico es suficiente |
 | Roles y permisos | No hay multi-usuario |
-| Carga masiva desde Excel | María migraría sus datos una vez. Se puede agregar después |
 | Historial de pólizas anteriores al sistema | Se empieza desde cero con los datos de María |
 
 ## 3. Supuestos
@@ -92,8 +95,12 @@ con cualquier otro intermediario.
 ### Flujo 3: Renovación
 1. En el modal de detalle, María da clic en "Renovar póliza"
 2. Ingresa la nueva fecha de vencimiento
-3. El sistema marca la póliza original como `RENOVADA` y crea una nueva `ACTIVA`
-4. Al cerrar el modal, el dashboard se actualiza
+3. El sistema valida la restricción regulatoria:
+   - Si la póliza está vencida y **no es AUTO**, se rechaza (solo autos pueden renovar post-vencimiento)
+   - Si la póliza está vencida **más de 30 días**, se rechaza (ventana regulatoria expirada)
+   - En ambos casos, la UI oculta el botón y muestra el mensaje de restricción
+4. Si pasa validación, el sistema marca la original como `RENOVADA` y crea una nueva `ACTIVA`
+5. Al cerrar el modal, el dashboard se actualiza
 
 ### Flujo 4: Crear póliza con cliente nuevo
 1. María da clic en "+ Nueva Póliza"
@@ -183,6 +190,7 @@ como badge de color en la columna "Última gestión" del dashboard.
 | PUT | `/api/policies/{id}` | Editar campos de póliza |
 | PUT | `/api/policies/{id}/renew` | Renovar póliza |
 | POST | `/api/contact-attempts` | Registrar gestión |
+| POST | `/api/import/clients` | Importar clientes y pólizas desde Excel o XML (multipart) |
 | GET | `/api/clients?advisorId=1` | Listar clientes |
 | GET | `/api/clients/{id}` | Detalle de cliente |
 | PUT | `/api/clients/{id}` | Editar campos de cliente |

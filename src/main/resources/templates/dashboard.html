@@ -141,6 +141,8 @@
         <a href="/?filter=not_interested" th:classappend="${currentFilter == 'not_interested' ? 'active' : ''}">No interesados</a>
     </div>
         <a href="/policy/nueva" class="btn btn-success">+ Nueva Póliza</a>
+        <button class="btn btn-secondary" onclick="refreshTable()" title="Refrescar lista">↻ Refrescar</button>
+        <button class="btn btn-primary" onclick="openImportModal()">📥 Importar</button>
     </div>
 
     <table>
@@ -201,6 +203,36 @@
         </div>
         <div id="modalContent">
             <div class="text-center text-muted" style="padding: 40px;">Cargando...</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="importModal">
+    <div class="modal" style="max-width:500px;">
+        <div class="modal-header">
+            <h2>Importar Clientes y Pólizas</h2>
+            <button class="modal-close" onclick="closeImportModal()">&times;</button>
+        </div>
+        <div id="importModalContent">
+            <div style="margin-bottom:16px;">
+                <p class="text-muted text-sm" style="margin-bottom:12px;">
+                    Selecciona un archivo <strong>.xlsx</strong> (Excel) o <strong>.xml</strong> con los datos de clientes y pólizas para importar.
+                </p>
+                <div class="form-group">
+                    <label>Archivo</label>
+                    <input type="file" id="importFileInput" accept=".xlsx,.xml" style="width:100%;padding:8px;border:1px solid #dee2e6;border-radius:6px;">
+                </div>
+                <div style="font-size:0.8em;color:#6c757d;margin-top:8px;padding:12px;background:#f8f9fa;border-radius:8px;">
+                    <strong>Formato Excel:</strong> Nombre, Teléfono, Email, Notas, Número Póliza, Tipo, Aseguradora, Fecha Inicio, Fecha Vencimiento<br>
+                    <strong>Formato XML:</strong> <code>&lt;importacion&gt;&lt;cliente&gt;&lt;nombre&gt;...&lt;/nombre&gt;&lt;poliza&gt;...&lt;/poliza&gt;&lt;/cliente&gt;&lt;/importacion&gt;</code>
+                </div>
+            </div>
+            <div id="importResultArea" style="display:none;"></div>
+            <div class="flex-row">
+                <button class="btn btn-primary" onclick="submitImport()">Importar</button>
+                <button class="btn btn-secondary" onclick="closeImportModal()">Cancelar</button>
+            </div>
+            <div id="importError" class="error mt-20" style="display:none;"></div>
         </div>
     </div>
 </div>
@@ -268,7 +300,10 @@
                 <textarea id="attemptNotes" placeholder="Notas de la gestión..." style="width:100%;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;resize:vertical;min-height:50px;margin-bottom:8px;"></textarea>
                 <div class="flex-row">
                     <button class="btn btn-primary" onclick="registerAttempt()">Registrar gestión</button>
-                    <button class="btn btn-success" onclick="showRenewForm()">Renovar póliza</button>
+                    <button class="btn btn-success" id="renewBtn" onclick="showRenewForm()">Renovar póliza</button>
+                </div>
+                <div id="renewRestrictionMsg" style="display:none;margin-top:8px;padding:8px 12px;background:#f8d7da;border-radius:6px;font-size:0.85em;color:#721c24;">
+                    Solo las pólizas de <strong>AUTO</strong> pueden renovarse después del vencimiento (máx. 30 días).
                 </div>
                 <div id="renewForm" style="display:none;margin-top:12px;padding:16px;background:#f8f9fa;border-radius:8px;">
                     <div class="form-group">
@@ -338,6 +373,25 @@
             <div style="max-height:200px;overflow-y:auto;margin-bottom:16px;">${attemptsHtml}</div>
             ${actionsHtml}
         `;
+
+        const dStatus = d.status;
+        const dType = d.type;
+        const dDaysOverdue = d.daysOverdue;
+        const renewBtn = document.getElementById('renewBtn');
+        const restrictionMsg = document.getElementById('renewRestrictionMsg');
+        if (dStatus === 'VENCIDO' && dType !== 'AUTO') {
+            if (renewBtn) renewBtn.style.display = 'none';
+            if (restrictionMsg) restrictionMsg.style.display = 'block';
+        } else if (dStatus === 'VENCIDO' && dType === 'AUTO' && dDaysOverdue > 30) {
+            if (renewBtn) renewBtn.style.display = 'none';
+            if (restrictionMsg) {
+                restrictionMsg.style.display = 'block';
+                restrictionMsg.innerHTML = 'La ventana de renovación de 30 días después del vencimiento ha expirado.';
+            }
+        } else {
+            if (renewBtn) renewBtn.style.display = '';
+            if (restrictionMsg) restrictionMsg.style.display = 'none';
+        }
     }
 
     function getPriorityColor(p) {
@@ -382,6 +436,14 @@
     async function renewPolicy() {
         const newDate = document.getElementById('newExpirationDate').value;
         if (!newDate) { alert('Selecciona una fecha de vencimiento.'); return; }
+        if (currentDetail && currentDetail.daysOverdue > 0 && currentDetail.type !== 'AUTO') {
+            alert('Solo las pólizas de AUTO pueden renovarse después del vencimiento.');
+            return;
+        }
+        if (currentDetail && currentDetail.daysOverdue > 30) {
+            alert('La ventana de renovación de 30 días después del vencimiento ha expirado.');
+            return;
+        }
         try {
             await apiPut('/api/policies/' + currentPolicyId + '/renew', {
                 newExpirationDate: newDate
@@ -395,7 +457,82 @@
     }
 
     function refreshTable() {
-        document.querySelector('.btn.active')?.click();
+        const activeFilter = document.querySelector('.filters a.active');
+        if (activeFilter) {
+            window.location.href = activeFilter.href;
+        } else {
+            window.location.href = '/';
+        }
+    }
+
+    function openImportModal() {
+        document.getElementById('importModal').classList.add('open');
+        document.getElementById('importFileInput').value = '';
+        document.getElementById('importResultArea').style.display = 'none';
+        document.getElementById('importError').style.display = 'none';
+    }
+
+    function closeImportModal() {
+        document.getElementById('importModal').classList.remove('open');
+    }
+
+    document.getElementById('importModal').addEventListener('click', function(e) {
+        if (e.target === this) closeImportModal();
+    });
+
+    async function submitImport() {
+        const fileInput = document.getElementById('importFileInput');
+        const file = fileInput.files[0];
+        if (!file) {
+            document.getElementById('importError').textContent = 'Selecciona un archivo para importar.';
+            document.getElementById('importError').style.display = 'block';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        document.getElementById('importError').style.display = 'none';
+        const submitBtn = document.querySelector('#importModal .btn-primary');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Importando...';
+
+        try {
+            const res = await fetch('/api/import/clients', {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) throw new Error('Error del servidor');
+            const result = await res.json();
+
+            const resultArea = document.getElementById('importResultArea');
+            let html = '<div style="padding:12px;border-radius:8px;margin-bottom:12px;';
+            if (result.totalErrores > 0) {
+                html += 'background:#fff3cd;color:#856404;">';
+                html += '<strong>⚠ Importación completada con advertencias</strong><br>';
+            } else {
+                html += 'background:#d4edda;color:#155724;">';
+                html += '<strong>✓ Importación completada exitosamente</strong><br>';
+            }
+            html += 'Procesados: ' + result.totalProcesados + ' | Creados: ' + result.totalCreados + ' | Errores: ' + result.totalErrores + '</div>';
+
+            if (result.errores && result.errores.length > 0) {
+                html += '<div style="max-height:150px;overflow-y:auto;font-size:0.85em;">';
+                result.errores.forEach(function(err) {
+                    html += '<div style="padding:4px 0;color:#e63946;">• ' + err + '</div>';
+                });
+                html += '</div>';
+            }
+
+            resultArea.innerHTML = html;
+            resultArea.style.display = 'block';
+        } catch (err) {
+            document.getElementById('importError').textContent = 'Error al importar: ' + err.message;
+            document.getElementById('importError').style.display = 'block';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Importar';
+        }
     }
 
     function formatDateTime(dateStr) {
@@ -491,6 +628,21 @@
         } catch (err) {
             alert('Error al guardar los cambios.');
         }
+    }
+
+    function formatTimeAgo(timestamp) {
+        if (!timestamp) return '';
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMin = Math.floor(diffMs / 60000);
+        if (diffMin < 1) return 'Ahora';
+        if (diffMin < 60) return 'Hace ' + diffMin + ' min';
+        const diffHours = Math.floor(diffMin / 60);
+        if (diffHours < 24) return 'Hace ' + diffHours + ' h';
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 7) return 'Hace ' + diffDays + ' d';
+        return date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
     }
 
     async function apiGet(url) {
