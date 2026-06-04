@@ -4,6 +4,11 @@ Aplicación web que reemplaza el Excel de María con un sistema para gestionar p
 registrar contactos con clientes y controlar renovaciones dentro de la ventana
 regulatoria de 30 días en Colombia.
 
+
+## VIDEO YOUTUBE
+
+- VIDEO YOUTUBE: https://youtu.be/VCis6FlAoOo
+
 ## Cómo ejecutar
 
 **Requisitos**: Java 17+ y Maven (incluido como `mvnw`)
