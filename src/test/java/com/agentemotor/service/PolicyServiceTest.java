@@ -34,6 +34,9 @@ class PolicyServiceTest {
     @Autowired
     private PolicyRepository policyRepository;
 
+    @Autowired
+    private ContactAttemptService contactAttemptService;
+
     private Long advisorId;
 
     @BeforeEach
@@ -168,7 +171,7 @@ class PolicyServiceTest {
         attemptRequest.setResult("CONTACTED");
         attemptRequest.setNotes("Cliente interesado en renovar.");
 
-        ContactAttemptDTO result = policyService.registerContactAttempt(attemptRequest);
+        ContactAttemptDTO result = contactAttemptService.registerContactAttempt(attemptRequest);
 
         assertThat(result).isNotNull();
         assertThat(result.getType()).isEqualTo("CALL");

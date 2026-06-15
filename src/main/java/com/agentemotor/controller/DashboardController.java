@@ -1,10 +1,10 @@
 package com.agentemotor.controller;
 
-import com.agentemotor.dto.DashboardStatsDTO;
 import com.agentemotor.dto.PolicyDetailDTO;
 import com.agentemotor.dto.PolicySummaryDTO;
 import com.agentemotor.service.PolicyService;
-import com.agentemotor.utils.PolicyConstants;
+import com.agentemotor.service.StatsService;
+import com.agentemotor.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,19 +17,20 @@ import java.util.List;
 public class DashboardController {
 
     private final PolicyService policyService;
+    private final StatsService statsService;
 
     @GetMapping("/")
     public String dashboard(
-            @RequestParam(defaultValue = "all") String filter,
+            @RequestParam(defaultValue = AppConstants.FILTER_ALL) String filter,
             Model model) {
 
-        DashboardStatsDTO stats = policyService.getDashboardStats(PolicyConstants.DEFAULT_ADVISOR_ID);
-        List<PolicySummaryDTO> policies = policyService.getPolicies(PolicyConstants.DEFAULT_ADVISOR_ID, filter);
+        var stats = statsService.getDashboardStats(AppConstants.DEFAULT_ADVISOR_ID);
+        List<PolicySummaryDTO> policies = policyService.getPolicies(AppConstants.DEFAULT_ADVISOR_ID, filter);
 
         model.addAttribute("stats", stats);
         model.addAttribute("policies", policies);
         model.addAttribute("currentFilter", filter);
-        return "dashboard";
+        return AppConstants.VIEW_DASHBOARD;
     }
 
     @GetMapping("/policy/{id}")
@@ -40,6 +41,6 @@ public class DashboardController {
 
     @GetMapping("/policy/nueva")
     public String newPolicyForm() {
-        return "policy-form";
+        return AppConstants.VIEW_POLICY_FORM;
     }
 }

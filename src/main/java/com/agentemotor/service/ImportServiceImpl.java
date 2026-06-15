@@ -3,7 +3,7 @@ package com.agentemotor.service;
 import com.agentemotor.dto.ImportResultDTO;
 import com.agentemotor.dto.PolicyRequestDTO;
 import com.agentemotor.model.PolicyType;
-import com.agentemotor.utils.PolicyConstants;
+import com.agentemotor.utils.AppConstants;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class ImportServiceImpl implements ImportService {
             log.warn("Intento de importación con archivo sin nombre");
             return ImportResultDTO.builder()
                     .totalProcesados(0).totalErrores(1).totalCreados(0)
-                    .errores(List.of(PolicyConstants.ERROR_IMPORT_EMPTY))
+                    .errores(List.of(AppConstants.ERROR_IMPORT_EMPTY))
                     .build();
         }
 
@@ -41,15 +41,15 @@ public class ImportServiceImpl implements ImportService {
 
         try {
             List<ImportRow> rows;
-            if ("xlsx".equals(ext)) {
+            if (AppConstants.IMPORT_FORMAT_XLSX.equals(ext)) {
                 rows = parseExcel(file.getInputStream());
-            } else if ("xml".equals(ext)) {
+            } else if (AppConstants.IMPORT_FORMAT_XML.equals(ext)) {
                 rows = parseXml(file.getInputStream());
             } else {
                 log.warn("Formato de archivo no soportado: {}", ext);
                 return ImportResultDTO.builder()
                         .totalProcesados(0).totalErrores(1).totalCreados(0)
-                        .errores(List.of(PolicyConstants.ERROR_IMPORT_UNSUPPORTED))
+                        .errores(List.of(AppConstants.ERROR_IMPORT_UNSUPPORTED))
                         .build();
             }
 
@@ -57,7 +57,7 @@ public class ImportServiceImpl implements ImportService {
                 log.warn("El archivo {} no contiene datos válidos", filename);
                 return ImportResultDTO.builder()
                         .totalProcesados(0).totalErrores(1).totalCreados(0)
-                        .errores(List.of(PolicyConstants.ERROR_IMPORT_EMPTY))
+                        .errores(List.of(AppConstants.ERROR_IMPORT_EMPTY))
                         .build();
             }
 
@@ -72,7 +72,7 @@ public class ImportServiceImpl implements ImportService {
                     validateRow(row, i + 1);
                     PolicyRequestDTO request = PolicyRequestDTO.builder()
                             .clientName(row.nombre)
-                            .clientPhone(row.telefono != null ? row.telefono : "")
+                            .clientPhone(row.telefono != null ? row.telefono : AppConstants.DEFAULT_PHONE)
                             .clientEmail(row.email)
                             .clientNotes(row.notas)
                             .policyNumber(row.numeroPoliza)
@@ -86,7 +86,7 @@ public class ImportServiceImpl implements ImportService {
                     creados++;
                     log.debug("Fila {} importada: póliza {} para cliente {}", i + 1, row.numeroPoliza, row.nombre);
                 } catch (Exception e) {
-                    errores.add(String.format(PolicyConstants.ERROR_IMPORT_INVALID_ROW, i + 1, e.getMessage()));
+                    errores.add(String.format(AppConstants.ERROR_IMPORT_INVALID_ROW, i + 1, e.getMessage()));
                     procesados++;
                     log.warn("Error en fila {}: {} - {}", i + 1, row.nombre, e.getMessage());
                 }
@@ -108,26 +108,26 @@ public class ImportServiceImpl implements ImportService {
             log.error("Error al leer el archivo {}: {}", filename, e.getMessage(), e);
             return ImportResultDTO.builder()
                     .totalProcesados(0).totalErrores(1).totalCreados(0)
-                    .errores(List.of("Error al leer el archivo: " + e.getMessage()))
+                    .errores(List.of(AppConstants.ERROR_IMPORT_FILE_READ + e.getMessage()))
                     .build();
         }
     }
 
     private void validateRow(ImportRow row, int rowNum) {
         List<String> missing = new ArrayList<>();
-        if (row.nombre == null || row.nombre.isBlank()) missing.add("nombre");
-        if (row.numeroPoliza == null || row.numeroPoliza.isBlank()) missing.add("número de póliza");
-        if (row.tipo == null || row.tipo.isBlank()) missing.add("tipo");
-        if (row.aseguradora == null || row.aseguradora.isBlank()) missing.add("aseguradora");
-        if (row.fechaInicio == null) missing.add("fecha de inicio");
-        if (row.fechaVencimiento == null) missing.add("fecha de vencimiento");
+        if (row.nombre == null || row.nombre.isBlank()) missing.add(AppConstants.FIELD_NOMBRE);
+        if (row.numeroPoliza == null || row.numeroPoliza.isBlank()) missing.add(AppConstants.FIELD_NUMERO_POLIZA);
+        if (row.tipo == null || row.tipo.isBlank()) missing.add(AppConstants.FIELD_TIPO);
+        if (row.aseguradora == null || row.aseguradora.isBlank()) missing.add(AppConstants.FIELD_ASEGURADORA);
+        if (row.fechaInicio == null) missing.add(AppConstants.FIELD_FECHA_INICIO);
+        if (row.fechaVencimiento == null) missing.add(AppConstants.FIELD_FECHA_VENCIMIENTO);
         if (!missing.isEmpty()) {
-            throw new IllegalArgumentException("Campos requeridos faltantes: " + String.join(", ", missing));
+            throw new IllegalArgumentException(AppConstants.ERROR_IMPORT_MISSING_FIELDS + String.join(", ", missing));
         }
         try {
             PolicyType.valueOf(row.tipo.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Tipo de póliza inválido: " + row.tipo);
+            throw new IllegalArgumentException(AppConstants.ERROR_IMPORT_INVALID_TYPE_PREFIX + row.tipo);
         }
     }
 

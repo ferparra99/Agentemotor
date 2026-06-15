@@ -9,7 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface ContactAttemptRepository extends JpaRepository<ContactAttempt, Long> {
+
     List<ContactAttempt> findByPolicyIdOrderByDateDesc(Long policyId);
+
     Optional<ContactAttempt> findTopByPolicyIdOrderByDateDesc(Long policyId);
+
     int countByPolicyId(Long policyId);
 }

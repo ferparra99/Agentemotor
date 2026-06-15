@@ -411,8 +411,7 @@
         const result = document.getElementById('attemptResult').value;
         const notes = document.getElementById('attemptNotes').value;
         try {
-            await apiPost('/api/contact-attempts', {
-                policyId: currentPolicyId,
+            await apiPost('/api/policies/register-attempt/' + currentPolicyId, {
                 type: type,
                 result: result,
                 notes: notes
@@ -445,7 +444,7 @@
             return;
         }
         try {
-            await apiPut('/api/policies/' + currentPolicyId + '/renew', {
+            await apiPut('/api/policies/renew/' + currentPolicyId, {
                 newExpirationDate: newDate
             });
             hideRenewForm();
@@ -498,7 +497,7 @@
         submitBtn.textContent = 'Importando...';
 
         try {
-            const res = await fetch('/api/import/clients', {
+            const res = await fetch('/api/imports/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -619,9 +618,9 @@
 
         try {
             if (currentDetail.clientId) {
-                await apiPut('/api/clients/' + currentDetail.clientId, clientData);
+                await apiPut('/api/clients/update/' + currentDetail.clientId, clientData);
             }
-            await apiPut('/api/policies/' + currentDetail.id, policyData);
+            await apiPut('/api/policies/update/' + currentDetail.id, policyData);
             exitEditMode();
             fetchPolicyDetail(currentDetail.id);
             refreshTable();

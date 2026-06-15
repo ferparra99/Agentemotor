@@ -1,0 +1,225 @@
+2026-06-13 18:45:10.203 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-06-13 18:45:10.240 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Starting AgentemotorApplication using Java 26.0.1 with PID 27488 (S:\Develop\SpringBoot\AgenteMotor\agentemotor\target\classes started by ferpa in S:\Develop\SpringBoot\AgenteMotor\agentemotor)
+2026-06-13 18:45:10.240 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - No active profile set, falling back to 1 default profile: "default"
+2026-06-13 18:45:10.270 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-06-13 18:45:10.270 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-06-13 18:45:11.016 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-13 18:45:11.064 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 40 ms. Found 4 JPA repository interfaces.
+2026-06-13 18:45:11.394 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-06-13 18:45:11.402 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-06-13 18:45:11.403 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-06-13 18:45:11.403 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-06-13 18:45:11.442 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-06-13 18:45:11.443 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1172 ms
+2026-06-13 18:45:11.542 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-13 18:45:11.591 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-06-13 18:45:11.618 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-06-13 18:45:11.834 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-13 18:45:11.858 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-13 18:45:11.994 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@4a68a4f5
+2026-06-13 18:45:11.996 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-06-13 18:45:12.024 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 3.49.1
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-13 18:45:12.598 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-13 18:45:12.623 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-13 18:45:13.267 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-06-13 18:45:13.277 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-06-13 18:45:13.297 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-06-13 18:45:13.302 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Started AgentemotorApplication in 3.461 seconds (process running for 3.988)
+2026-06-13 18:45:13.304 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-13 18:45:13.304 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-13 18:45:24.318 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-13 18:45:24.318 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-06-13 18:45:24.319 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-06-13 18:45:24.471 [http-nio-8080-exec-1] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:45:24.484 [http-nio-8080-exec-1] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:45:37.029 [http-nio-8080-exec-3] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:45:37.036 [http-nio-8080-exec-3] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:51:23.774 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-06-13 18:51:23.779 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-06-13 18:51:23.780 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-13 18:51:23.783 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-06-13 18:51:23.785 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-06-13 18:51:26.464 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-06-13 18:51:26.491 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Starting AgentemotorApplication using Java 26.0.1 with PID 27564 (S:\Develop\SpringBoot\AgenteMotor\agentemotor\target\classes started by ferpa in S:\Develop\SpringBoot\AgenteMotor\agentemotor)
+2026-06-13 18:51:26.492 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - No active profile set, falling back to 1 default profile: "default"
+2026-06-13 18:51:26.523 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-06-13 18:51:26.523 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-06-13 18:51:26.989 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-13 18:51:27.030 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 34 ms. Found 4 JPA repository interfaces.
+2026-06-13 18:51:27.367 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-06-13 18:51:27.376 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-06-13 18:51:27.378 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-06-13 18:51:27.378 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-06-13 18:51:27.410 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-06-13 18:51:27.411 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 886 ms
+2026-06-13 18:51:27.501 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-13 18:51:27.533 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-06-13 18:51:27.552 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-06-13 18:51:27.734 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-13 18:51:27.755 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-13 18:51:27.872 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@6b6fb5ac
+2026-06-13 18:51:27.873 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-06-13 18:51:27.896 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 3.49.1
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-13 18:51:28.450 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-13 18:51:28.475 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-13 18:51:29.077 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-06-13 18:51:29.087 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-06-13 18:51:29.101 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-06-13 18:51:29.107 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Started AgentemotorApplication in 3.065 seconds (process running for 4.165)
+2026-06-13 18:51:29.108 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-13 18:51:29.108 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-13 18:51:36.366 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-13 18:51:36.367 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-06-13 18:51:36.367 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+2026-06-13 18:51:36.732 [http-nio-8080-exec-1] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:51:36.748 [http-nio-8080-exec-1] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:51:39.240 [http-nio-8080-exec-2] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:51:39.252 [http-nio-8080-exec-2] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:51:44.154 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:51:44.160 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:51:51.194 [http-nio-8080-exec-5] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:51:51.197 [http-nio-8080-exec-5] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:51:54.508 [http-nio-8080-exec-6] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:51:54.514 [http-nio-8080-exec-6] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:51:56.766 [http-nio-8080-exec-7] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:51:56.768 [http-nio-8080-exec-7] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:51:59.398 [http-nio-8080-exec-8] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:51:59.401 [http-nio-8080-exec-8] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:52:00.760 [http-nio-8080-exec-9] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:52:00.762 [http-nio-8080-exec-9] INFO  c.a.service.PolicyServiceImpl - Se encontraron 40 pólizas (filtro: active)
+2026-06-13 18:52:01.429 [http-nio-8080-exec-10] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 18:52:01.432 [http-nio-8080-exec-10] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 18:52:17.384 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-06-13 18:52:17.390 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-06-13 18:52:17.392 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-13 18:52:17.394 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-06-13 18:52:17.395 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-06-13 18:52:22.322 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-06-13 18:52:22.354 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Starting AgentemotorApplication using Java 26.0.1 with PID 18472 (S:\Develop\SpringBoot\AgenteMotor\agentemotor\target\classes started by ferpa in S:\Develop\SpringBoot\AgenteMotor\agentemotor)
+2026-06-13 18:52:22.355 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - No active profile set, falling back to 1 default profile: "default"
+2026-06-13 18:52:22.383 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-06-13 18:52:22.383 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-06-13 18:52:22.911 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-13 18:52:22.948 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 32 ms. Found 4 JPA repository interfaces.
+2026-06-13 18:52:23.267 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-06-13 18:52:23.274 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-06-13 18:52:23.277 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-06-13 18:52:23.278 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-06-13 18:52:23.312 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-06-13 18:52:23.312 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 929 ms
+2026-06-13 18:52:23.402 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-13 18:52:23.433 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-06-13 18:52:23.453 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-06-13 18:52:23.636 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-13 18:52:23.656 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-13 18:52:23.776 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@a704a34
+2026-06-13 18:52:23.777 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-06-13 18:52:23.800 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 3.49.1
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-13 18:52:24.332 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-13 18:52:24.356 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-13 18:52:25.262 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-06-13 18:52:25.278 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-06-13 18:52:25.307 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-06-13 18:52:25.317 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Started AgentemotorApplication in 3.377 seconds (process running for 3.87)
+2026-06-13 18:52:25.324 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-13 18:52:25.324 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-13 18:52:26.716 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-06-13 18:52:26.723 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-06-13 18:52:26.726 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-13 18:52:26.728 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-06-13 18:52:26.729 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-06-13 18:52:28.391 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-06-13 18:52:28.420 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Starting AgentemotorApplication using Java 26.0.1 with PID 26160 (S:\Develop\SpringBoot\AgenteMotor\agentemotor\target\classes started by ferpa in S:\Develop\SpringBoot\AgenteMotor\agentemotor)
+2026-06-13 18:52:28.420 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - No active profile set, falling back to 1 default profile: "default"
+2026-06-13 18:52:28.448 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-06-13 18:52:28.448 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-06-13 18:52:28.892 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-13 18:52:28.930 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 33 ms. Found 4 JPA repository interfaces.
+2026-06-13 18:52:29.255 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-06-13 18:52:29.264 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-06-13 18:52:29.266 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-06-13 18:52:29.266 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-06-13 18:52:29.302 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-06-13 18:52:29.302 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 854 ms
+2026-06-13 18:52:29.396 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-13 18:52:29.428 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-06-13 18:52:29.448 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-06-13 18:52:29.633 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-13 18:52:29.653 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-13 18:52:29.761 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@116eb3a9
+2026-06-13 18:52:29.762 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-06-13 18:52:29.785 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 3.49.1
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-13 18:52:30.318 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-13 18:52:30.342 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-13 18:52:31.213 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-06-13 18:52:31.230 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-06-13 18:52:31.257 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-06-13 18:52:31.266 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Started AgentemotorApplication in 3.238 seconds (process running for 3.804)
+2026-06-13 18:52:31.271 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-13 18:52:31.271 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-13 18:52:40.412 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-13 18:52:40.412 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-06-13 18:52:40.413 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-06-13 18:52:40.692 [http-nio-8080-exec-2] INFO  c.a.service.PolicyServiceImpl - Póliza string actualizada (aseguradora: string → string)
+2026-06-13 18:52:48.431 [http-nio-8080-exec-3] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'PUT' is not supported]
+2026-06-13 18:52:53.890 [http-nio-8080-exec-4] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.method.annotation.MethodArgumentTypeMismatchException: Method parameter 'id': Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; For input string: "all"]
+2026-06-13 18:53:14.280 [http-nio-8080-exec-6] INFO  c.a.service.PolicyServiceImpl - Póliza string actualizada (aseguradora: string → string)
+2026-06-13 19:15:58.587 [http-nio-8080-exec-8] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:15:58.600 [http-nio-8080-exec-8] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 19:16:00.896 [http-nio-8080-exec-9] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:16:00.903 [http-nio-8080-exec-9] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 19:16:01.933 [http-nio-8080-exec-10] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:16:01.936 [http-nio-8080-exec-10] INFO  c.a.service.PolicyServiceImpl - Se encontraron 40 pólizas (filtro: active)
+2026-06-13 19:16:02.647 [http-nio-8080-exec-1] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:16:02.650 [http-nio-8080-exec-1] INFO  c.a.service.PolicyServiceImpl - Se encontraron 2 pólizas (filtro: expiring)
+2026-06-13 19:16:03.082 [http-nio-8080-exec-2] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:16:03.086 [http-nio-8080-exec-2] INFO  c.a.service.PolicyServiceImpl - Se encontraron 3 pólizas (filtro: expired_lt_30)
+2026-06-13 19:16:03.613 [http-nio-8080-exec-3] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:16:03.616 [http-nio-8080-exec-3] INFO  c.a.service.PolicyServiceImpl - Se encontraron 1 pólizas (filtro: expired_gt_30)
+2026-06-13 19:16:03.978 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:16:04.030 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Se encontraron 2 pólizas (filtro: interested)
+2026-06-13 19:16:04.309 [http-nio-8080-exec-5] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:16:04.331 [http-nio-8080-exec-5] INFO  c.a.service.PolicyServiceImpl - Se encontraron 2 pólizas (filtro: not_interested)
+2026-06-13 19:16:05.068 [http-nio-8080-exec-6] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:16:05.070 [http-nio-8080-exec-6] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 19:18:03.627 [http-nio-8080-exec-2] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:18:03.629 [http-nio-8080-exec-2] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 19:18:52.442 [http-nio-8080-exec-5] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:18:52.444 [http-nio-8080-exec-5] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 19:18:55.487 [http-nio-8080-exec-7] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:18:55.488 [http-nio-8080-exec-7] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 19:24:45.341 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-13 19:24:45.342 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-13 22:46:34.191 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-06-13 22:46:34.210 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-06-13 22:46:34.217 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-13 22:46:34.228 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-06-13 22:46:34.230 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

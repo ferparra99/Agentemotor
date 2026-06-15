@@ -104,13 +104,16 @@ agentemotor/
 
 4. **Seed data idempotente**: `data.sql` usa `INSERT OR IGNORE` para carga única.
 
-5. **Constantes centralizadas**: `utils/PolicyConstants.java` agrupa IDs, días de
-   ventana, mensajes de error, prioridades y textos de acción. Fácil de modificar
-   si cambia la regulación.
+5. **Constantes centralizadas**: `utils/AppConstants.java` agrupa todos los valores
+   del dominio (IDs, días de ventana, mensajes de error, prioridades, filtros,
+   resultados de contacto, nombres de vistas) organizados por secciones con
+   comentarios que indican dónde se usa cada grupo. Fácil de modificar si cambia
+   la regulación.
 
-6. **Auto-inyección `@Lazy self`**: Para que llamadas internas entre métodos
-   `@Transactional` pasen por el proxy de Spring y respeten los límites de
-   transacción.
+6. **Auto-inyección evitada**: No se usa `@Lazy self`. Las llamadas a métodos
+   `@Transactional` dentro de la misma clase se evitan extrayendo helpers
+   privados sin anotación, y las llamadas entre servicios distintos pasan por
+   el proxy de Spring naturalmente.
 
 7. **Creación de cliente al vuelo**: Al crear una póliza se escribe nombre y
    teléfono; el sistema crea el `Client` automáticamente. Sin paso previo de
@@ -128,16 +131,17 @@ agentemotor/
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/api/policies?advisorId=1&filter=all` | Listar pólizas |
-| GET | `/api/policies/{id}` | Detalle de póliza |
-| POST | `/api/policies` | Crear póliza (con cliente nuevo) |
-| PUT | `/api/policies/{id}` | Editar campos de póliza |
-| PUT | `/api/policies/{id}/renew` | Renovar póliza |
-| POST | `/api/contact-attempts` | Registrar gestión |
-| GET | `/api/clients?advisorId=1` | Listar clientes |
-| GET | `/api/clients/{id}` | Detalle de cliente |
-| PUT | `/api/clients/{id}` | Editar campos de cliente |
-| GET | `/api/stats?advisorId=1` | Estadísticas del dashboard |
+| GET | `/api/policies/list?advisorId=1&filter=all` | Listar pólizas (con filtro) |
+| POST | `/api/policies/create` | Crear póliza (con cliente nuevo) |
+| GET | `/api/policies/detail/{id}` | Detalle de póliza |
+| PUT | `/api/policies/update/{id}` | Editar campos de póliza |
+| PUT | `/api/policies/renew/{id}` | Renovar póliza |
+| POST | `/api/policies/register-attempt/{id}` | Registrar gestión de contacto |
+| GET | `/api/clients/list?advisorId=1` | Listar clientes |
+| GET | `/api/clients/detail/{id}` | Detalle de cliente |
+| PUT | `/api/clients/update/{id}` | Editar campos de cliente |
+| GET | `/api/dashboard/stats?advisorId=1` | Estadísticas del dashboard |
+| POST | `/api/imports/upload` | Importar clientes y pólizas (.xlsx/.xml) |
 
 Documentación interactiva en `/swagger-ui.html`.
 

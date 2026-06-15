@@ -1,0 +1,157 @@
+2026-06-04 14:49:42.188 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-06-04 14:49:42.211 [main] INFO  c.a.AgentemotorApplicationTests - Starting AgentemotorApplicationTests using Java 26 with PID 13328 (started by ferpa in S:\Develop\SpringBoot\AgenteMotor\agentemotor)
+2026-06-04 14:49:42.212 [main] INFO  c.a.AgentemotorApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-06-04 14:49:42.755 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-04 14:49:42.815 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 44 ms. Found 4 JPA repository interfaces.
+2026-06-04 14:49:43.115 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-04 14:49:43.178 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-06-04 14:49:43.211 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-06-04 14:49:43.487 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-04 14:49:43.516 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-04 14:49:43.675 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-06-04 14:49:43.676 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-06-04 14:49:43.700 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-06-04 14:49:43.716 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-04 14:49:44.379 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-04 14:49:44.420 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-04 14:49:44.935 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-04 14:49:45.394 [main] INFO  c.a.AgentemotorApplicationTests - Started AgentemotorApplicationTests in 3.502 seconds (process running for 10.438)
+2026-06-04 14:49:45.397 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-04 14:49:45.397 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-04 14:49:46.038 [main] WARN  c.a.service.PolicyServiceImpl - Intento de renovación rechazado: póliza HOGAR-EXP-001 es HOGAR (solo AUTO renovable post-vencimiento)
+2026-06-04 14:49:46.043 [main] INFO  c.a.service.PolicyServiceImpl - Póliza HOGAR-ACT-001 renovada → HOGAR-ACT-001-R1 (nuevo vencimiento: 2027-06-04)
+2026-06-04 14:49:46.048 [main] WARN  c.a.service.PolicyServiceImpl - Intento de renovación rechazado: póliza AUTO-EXP-002 vencida hace 35 días (máx 30 días)
+2026-06-04 14:49:46.050 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-EXP-001 renovada → AUTO-EXP-001-R1 (nuevo vencimiento: 2027-06-04)
+2026-06-04 14:49:46.059 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 1 pólizas (filtro: interested)
+2026-06-04 14:49:46.068 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 2 pólizas (filtro: interested)
+2026-06-04 14:49:46.073 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 0 pólizas (filtro: interested)
+2026-06-04 14:49:46.076 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 1 pólizas (filtro: interested)
+2026-06-04 14:49:46.080 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 0 pólizas (filtro: not_interested)
+2026-06-04 14:49:46.084 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 1 pólizas (filtro: not_interested)
+2026-06-04 14:49:46.089 [main] INFO  c.a.service.PolicyServiceImpl - Cliente Juan Pérez actualizado (ID: 10, nombre: Juan Pérez → Solo Nombre, teléfono: +57 310 111 2233 → +57 310 111 2233)
+2026-06-04 14:49:46.092 [main] WARN  c.a.service.PolicyServiceImpl - Cliente no encontrado: 999
+2026-06-04 14:49:46.095 [main] INFO  c.a.service.PolicyServiceImpl - Cliente Juan Pérez actualizado (ID: 10, nombre: Juan Pérez → Nombre Actualizado, teléfono: +57 310 111 2233 → +57 999 888 7766)
+2026-06-04 14:49:46.101 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-999-UPDATED actualizada (aseguradora: Seguros Sura → New Insurer)
+2026-06-04 14:49:46.105 [main] WARN  c.a.service.PolicyServiceImpl - Póliza no encontrada para actualización: 999
+2026-06-04 14:49:46.108 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-010-2026 actualizada (aseguradora: Seguros Sura → Only Insurer Changed)
+2026-06-04 14:49:46.122 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-999-2026 creada para cliente Nuevo Cliente (ID póliza: 200, ID cliente: 99)
+2026-06-04 14:49:46.125 [main] ERROR c.a.service.PolicyServiceImpl - Asesor por defecto (ID=1) no encontrado
+2026-06-04 14:49:46.130 [main] INFO  c.a.service.PolicyServiceImpl - Póliza HOGAR-001-2026 creada para cliente Cliente Sin Teléfono (ID póliza: 201, ID cliente: 98)
+2026-06-04 14:49:46.136 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.agentemotor.service.PolicyServiceTest]: PolicyServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-06-04 14:49:46.147 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.agentemotor.AgentemotorApplication for test class com.agentemotor.service.PolicyServiceTest
+2026-06-04 14:49:46.150 [main] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+2026-06-04 14:49:46.166 [main] INFO  c.a.service.PolicyServiceTest - Starting PolicyServiceTest using Java 26 with PID 13328 (started by ferpa in S:\Develop\SpringBoot\AgenteMotor\agentemotor)
+2026-06-04 14:49:46.166 [main] INFO  c.a.service.PolicyServiceTest - The following 1 profile is active: "test"
+2026-06-04 14:49:46.297 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-04 14:49:46.308 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 9 ms. Found 4 JPA repository interfaces.
+2026-06-04 14:49:46.356 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-04 14:49:46.359 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-06-04 14:49:46.367 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-04 14:49:46.371 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-06-04 14:49:46.372 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:testdb user=SA
+2026-06-04 14:49:46.372 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-06-04 14:49:46.373 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-06-04 14:49:46.374 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-04 14:49:46.419 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-04 14:49:46.428 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-04 14:49:46.495 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-04 14:49:46.563 [main] INFO  c.a.service.PolicyServiceTest - Started PolicyServiceTest in 0.412 seconds (process running for 11.607)
+2026-06-04 14:49:46.563 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-04 14:49:46.563 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-04 14:49:46.717 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-001 marcada como VENCIDO
+2026-06-04 14:49:46.717 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-002 marcada como PERDIDO (venció hace >30 días)
+2026-06-04 14:49:46.717 [main] INFO  c.a.service.PolicyServiceImpl - Póliza HOGAR-EXP-INT-001 marcada como VENCIDO
+2026-06-04 14:49:46.719 [main] INFO  c.a.service.PolicyServiceImpl - Estados actualizados: 3 pólizas modificadas
+2026-06-04 14:49:46.730 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 4 pólizas (filtro: all)
+2026-06-04 14:49:46.746 [main] WARN  c.a.service.PolicyServiceImpl - Intento de renovación rechazado: póliza HOGAR-EXP-INT-001 es HOGAR (solo AUTO renovable post-vencimiento)
+2026-06-04 14:49:46.759 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-001 marcada como VENCIDO
+2026-06-04 14:49:46.759 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-002 marcada como PERDIDO (venció hace >30 días)
+2026-06-04 14:49:46.759 [main] INFO  c.a.service.PolicyServiceImpl - Estados actualizados: 2 pólizas modificadas
+2026-06-04 14:49:46.763 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 3 pólizas (filtro: all)
+2026-06-04 14:49:46.774 [main] INFO  c.a.service.PolicyServiceImpl - Gestión registrada: CALL → CONTACTED en póliza AUTO-TEST-003 (ID gestión: 1)
+2026-06-04 14:49:46.779 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 3 pólizas (filtro: all)
+2026-06-04 14:49:46.796 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-001 marcada como VENCIDO
+2026-06-04 14:49:46.796 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-002 marcada como PERDIDO (venció hace >30 días)
+2026-06-04 14:49:46.797 [main] INFO  c.a.service.PolicyServiceImpl - Estados actualizados: 2 pólizas modificadas
+2026-06-04 14:49:46.800 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 3 pólizas (filtro: all)
+2026-06-04 14:49:46.810 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 1 pólizas (filtro: expired_lt_30)
+2026-06-04 14:49:46.815 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 1 pólizas (filtro: expired_gt_30)
+2026-06-04 14:49:46.828 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-001 marcada como VENCIDO
+2026-06-04 14:49:46.828 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-002 marcada como PERDIDO (venció hace >30 días)
+2026-06-04 14:49:46.830 [main] INFO  c.a.service.PolicyServiceImpl - Estados actualizados: 2 pólizas modificadas
+2026-06-04 14:49:46.833 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 3 pólizas (filtro: all)
+2026-06-04 14:49:46.841 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-001 renovada → AUTO-TEST-001-R1 (nuevo vencimiento: 2027-06-04)
+2026-06-04 14:49:46.855 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-001 marcada como VENCIDO
+2026-06-04 14:49:46.855 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-002 marcada como PERDIDO (venció hace >30 días)
+2026-06-04 14:49:46.855 [main] INFO  c.a.service.PolicyServiceImpl - Estados actualizados: 2 pólizas modificadas
+2026-06-04 14:49:46.859 [main] INFO  c.a.service.PolicyServiceImpl - Se encontraron 3 pólizas (filtro: all)
+2026-06-04 14:49:46.866 [main] INFO  c.a.service.PolicyServiceImpl - Póliza AUTO-TEST-001 renovada → AUTO-TEST-001-R1 (nuevo vencimiento: 2027-06-04)
+2026-06-04 14:49:46.882 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-04 14:49:46.886 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-06-04 14:49:46.887 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-06-04 14:49:46.889 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-04 14:49:46.889 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-06-04 14:49:46.890 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-06-04 15:47:46.822 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-06-04 15:47:46.863 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Starting AgentemotorApplication using Java 26.0.1 with PID 20680 (S:\Develop\SpringBoot\AgenteMotor\agentemotor\target\classes started by ferpa in S:\Develop\SpringBoot\AgenteMotor\agentemotor)
+2026-06-04 15:47:46.865 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - No active profile set, falling back to 1 default profile: "default"
+2026-06-04 15:47:46.897 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-06-04 15:47:46.897 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-06-04 15:47:47.495 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-04 15:47:47.544 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 41 ms. Found 4 JPA repository interfaces.
+2026-06-04 15:47:47.879 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-06-04 15:47:47.889 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-06-04 15:47:47.890 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-06-04 15:47:47.890 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-06-04 15:47:47.928 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-06-04 15:47:47.928 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1031 ms
+2026-06-04 15:47:48.032 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-04 15:47:48.082 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-06-04 15:47:48.110 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-06-04 15:47:48.363 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-04 15:47:48.388 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-04 15:47:48.468 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@7cb48840
+2026-06-04 15:47:48.469 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-06-04 15:47:48.501 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 3.49.1
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-04 15:47:49.119 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-04 15:47:49.149 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-04 15:47:49.844 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-06-04 15:47:49.854 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-06-04 15:47:49.866 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-06-04 15:47:49.873 [restartedMain] INFO  c.agentemotor.AgentemotorApplication - Started AgentemotorApplication in 3.442 seconds (process running for 3.888)
+2026-06-04 15:47:49.874 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-04 15:47:49.874 [restartedMain] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-04 15:48:36.322 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-04 15:48:36.322 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-06-04 15:48:36.323 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-06-04 15:48:42.979 [http-nio-8080-exec-2] INFO  c.a.service.PolicyServiceImpl - Gestión registrada: CALL → NO_ANSWER en póliza AUTO-123-2026 (ID gestión: 13)
+2026-06-04 15:48:43.024 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Póliza string marcada como VENCIDO
+2026-06-04 15:48:43.027 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Estados actualizados: 1 pólizas modificadas
+2026-06-04 15:48:43.047 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Estadísticas: 40 activas, 0 vencen esta semana, 3 vencidas <30d, 1 perdidas, 2 renovadas
+2026-06-04 15:48:43.071 [http-nio-8080-exec-4] INFO  c.a.service.PolicyServiceImpl - Se encontraron 46 pólizas (filtro: all)
+2026-06-04 16:42:26.392 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-06-04 16:42:26.413 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-06-04 16:42:26.424 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-04 16:42:26.439 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-06-04 16:42:26.442 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

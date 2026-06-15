@@ -24,8 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import org.springframework.test.util.ReflectionTestUtils;
-
 @ExtendWith(MockitoExtension.class)
 class PolicyServiceImplTest {
 
@@ -33,13 +31,13 @@ class PolicyServiceImplTest {
     private PolicyRepository policyRepository;
 
     @Mock
-    private ClientRepository clientRepository;
-
-    @Mock
-    private ContactAttemptRepository contactAttemptRepository;
-
-    @Mock
     private AdvisorRepository advisorRepository;
+
+    @Mock
+    private ClientService clientService;
+
+    @Mock
+    private ContactAttemptService contactAttemptService;
 
     @InjectMocks
     private PolicyServiceImpl policyService;
@@ -78,8 +76,6 @@ class PolicyServiceImplTest {
                 .client(testClient)
                 .advisor(defaultAdvisor)
                 .build();
-
-        ReflectionTestUtils.setField(policyService, "self", policyService);
     }
 
     // ──────────────────────────────────────────────
@@ -89,9 +85,6 @@ class PolicyServiceImplTest {
     @Nested
     @DisplayName("createPolicy()")
     class CreatePolicyTests {
-
-        @Captor
-        private ArgumentCaptor<Client> clientCaptor;
 
         @Captor
         private ArgumentCaptor<Policy> policyCaptor;
@@ -133,12 +126,11 @@ class PolicyServiceImplTest {
                     .advisor(defaultAdvisor)
                     .build();
 
-            when(clientRepository.findByAdvisorIdAndNameAndPhone(anyLong(), anyString(), anyString()))
-                    .thenReturn(Optional.empty());
             when(advisorRepository.findById(1L)).thenReturn(Optional.of(defaultAdvisor));
-            when(clientRepository.save(any(Client.class))).thenReturn(savedClient);
+            when(clientService.findOrCreateClient(anyString(), anyString(), any(), any(), anyLong()))
+                    .thenReturn(savedClient);
             when(policyRepository.save(any(Policy.class))).thenReturn(savedPolicy);
-            when(contactAttemptRepository.countByPolicyId(200L)).thenReturn(0);
+            when(contactAttemptService.countAttemptsByPolicy(200L)).thenReturn(0);
 
             PolicySummaryDTO result = policyService.createPolicy(request);
 
@@ -149,12 +141,6 @@ class PolicyServiceImplTest {
             assertThat(result.getType()).isEqualTo("AUTO");
             assertThat(result.getInsurer()).isEqualTo("Mapfre");
             assertThat(result.getStatus()).isEqualTo("ACTIVO");
-
-            verify(clientRepository).save(clientCaptor.capture());
-            assertThat(clientCaptor.getValue().getName()).isEqualTo("Nuevo Cliente");
-            assertThat(clientCaptor.getValue().getPhone()).isEqualTo("+57 300 999 8877");
-            assertThat(clientCaptor.getValue().getEmail()).isEqualTo("nuevo@email.com");
-            assertThat(clientCaptor.getValue().getNotes()).isEqualTo("Nota de prueba");
 
             verify(policyRepository).save(policyCaptor.capture());
             assertThat(policyCaptor.getValue().getPolicyNumber()).isEqualTo("AUTO-999-2026");
@@ -193,20 +179,16 @@ class PolicyServiceImplTest {
                     .advisor(defaultAdvisor)
                     .build();
 
-            when(clientRepository.findByAdvisorIdAndNameAndPhone(anyLong(), anyString(), anyString()))
-                    .thenReturn(Optional.empty());
             when(advisorRepository.findById(1L)).thenReturn(Optional.of(defaultAdvisor));
-            when(clientRepository.save(any(Client.class))).thenReturn(savedClient);
+            when(clientService.findOrCreateClient(anyString(), anyString(), any(), any(), anyLong()))
+                    .thenReturn(savedClient);
             when(policyRepository.save(any(Policy.class))).thenReturn(savedPolicy);
-            when(contactAttemptRepository.countByPolicyId(201L)).thenReturn(0);
+            when(contactAttemptService.countAttemptsByPolicy(201L)).thenReturn(0);
 
             PolicySummaryDTO result = policyService.createPolicy(request);
 
             assertThat(result.getClientName()).isEqualTo("Cliente Sin Teléfono");
             assertThat(result.getClientPhone()).isEmpty();
-
-            verify(clientRepository).save(clientCaptor.capture());
-            assertThat(clientCaptor.getValue().getPhone()).isEmpty();
         }
 
         @Test
@@ -227,7 +209,7 @@ class PolicyServiceImplTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Advisor not found");
 
-            verify(clientRepository, never()).save(any());
+            verify(clientService, never()).findOrCreateClient(anyString(), anyString(), any(), any(), anyLong());
             verify(policyRepository, never()).save(any());
         }
 
@@ -272,7 +254,7 @@ class PolicyServiceImplTest {
 
             when(policyRepository.findById(100L)).thenReturn(Optional.of(testPolicy));
             when(policyRepository.save(any(Policy.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(contactAttemptRepository.countByPolicyId(100L)).thenReturn(0);
+            when(contactAttemptService.countAttemptsByPolicy(100L)).thenReturn(0);
 
             PolicySummaryDTO result = policyService.updatePolicy(request);
 
@@ -299,7 +281,7 @@ class PolicyServiceImplTest {
 
             when(policyRepository.findById(100L)).thenReturn(Optional.of(testPolicy));
             when(policyRepository.save(any(Policy.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(contactAttemptRepository.countByPolicyId(100L)).thenReturn(0);
+            when(contactAttemptService.countAttemptsByPolicy(100L)).thenReturn(0);
 
             PolicySummaryDTO result = policyService.updatePolicy(request);
 
@@ -343,81 +325,6 @@ class PolicyServiceImplTest {
 
             assertThatThrownBy(() -> policyService.updatePolicy(request))
                     .isInstanceOf(IllegalArgumentException.class);
-        }
-    }
-
-    // ──────────────────────────────────────────────
-    //  updateClient()
-    // ──────────────────────────────────────────────
-
-    @Nested
-    @DisplayName("updateClient()")
-    class UpdateClientTests {
-
-        @Test
-        @DisplayName("updates all client fields successfully")
-        void updateClient_allFields() {
-            ClientDetailDTO updateData = ClientDetailDTO.builder()
-                    .name("Nombre Actualizado")
-                    .phone("+57 999 888 7766")
-                    .email("actualizado@email.com")
-                    .notes("Notas actualizadas")
-                    .build();
-
-            when(clientRepository.findById(10L)).thenReturn(Optional.of(testClient));
-            when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(policyRepository.findByClientId(10L)).thenReturn(List.of(testPolicy));
-
-            ClientDetailDTO result = policyService.updateClient(10L, updateData);
-
-            assertThat(result.getName()).isEqualTo("Nombre Actualizado");
-            assertThat(result.getPhone()).isEqualTo("+57 999 888 7766");
-            assertThat(result.getEmail()).isEqualTo("actualizado@email.com");
-            assertThat(result.getNotes()).isEqualTo("Notas actualizadas");
-
-            verify(clientRepository).save(argThat(c ->
-                    c.getName().equals("Nombre Actualizado") &&
-                    c.getPhone().equals("+57 999 888 7766") &&
-                    c.getEmail().equals("actualizado@email.com") &&
-                    c.getNotes().equals("Notas actualizadas")
-            ));
-        }
-
-        @Test
-        @DisplayName("updates only provided client fields")
-        void updateClient_partial() {
-            ClientDetailDTO updateData = ClientDetailDTO.builder()
-                    .name("Solo Nombre")
-                    .build();
-
-            when(clientRepository.findById(10L)).thenReturn(Optional.of(testClient));
-            when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(policyRepository.findByClientId(10L)).thenReturn(List.of(testPolicy));
-
-            ClientDetailDTO result = policyService.updateClient(10L, updateData);
-
-            assertThat(result.getName()).isEqualTo("Solo Nombre");
-            assertThat(result.getPhone()).isEqualTo("+57 310 111 2233");
-            assertThat(result.getEmail()).isEqualTo("juan@email.com");
-
-            verify(clientRepository).save(argThat(c ->
-                    c.getName().equals("Solo Nombre") &&
-                    c.getPhone().equals("+57 310 111 2233")
-            ));
-        }
-
-        @Test
-        @DisplayName("throws exception when client not found")
-        void updateClient_notFound() {
-            ClientDetailDTO updateData = ClientDetailDTO.builder().name("X").build();
-
-            when(clientRepository.findById(999L)).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> policyService.updateClient(999L, updateData))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Client not found");
-
-            verify(clientRepository, never()).save(any());
         }
     }
 
@@ -466,19 +373,19 @@ class PolicyServiceImplTest {
         void filterInterested() {
             when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest, policyWithNoInterest, policyWithContacted));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
+            when(contactAttemptService.findLastAttemptByPolicy(201L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(1L).date(LocalDateTime.now()).type(ContactAttemptType.CALL)
                             .result(ContactAttemptResult.INTERESTED).build()));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(202L))
+            when(contactAttemptService.findLastAttemptByPolicy(202L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(2L).date(LocalDateTime.now()).type(ContactAttemptType.WHATSAPP)
                             .result(ContactAttemptResult.NOT_INTERESTED).build()));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(203L))
+            when(contactAttemptService.findLastAttemptByPolicy(203L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(3L).date(LocalDateTime.now()).type(ContactAttemptType.EMAIL)
                             .result(ContactAttemptResult.CONTACTED).build()));
-            when(contactAttemptRepository.countByPolicyId(anyLong())).thenReturn(1);
+            when(contactAttemptService.countAttemptsByPolicy(anyLong())).thenReturn(1);
 
             List<PolicySummaryDTO> result = policyService.getPolicies(1L, "interested");
 
@@ -491,19 +398,19 @@ class PolicyServiceImplTest {
         void filterNotInterested() {
             when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest, policyWithNoInterest, policyWithContacted));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
+            when(contactAttemptService.findLastAttemptByPolicy(201L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(1L).date(LocalDateTime.now()).type(ContactAttemptType.CALL)
                             .result(ContactAttemptResult.INTERESTED).build()));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(202L))
+            when(contactAttemptService.findLastAttemptByPolicy(202L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(2L).date(LocalDateTime.now()).type(ContactAttemptType.WHATSAPP)
                             .result(ContactAttemptResult.NOT_INTERESTED).build()));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(203L))
+            when(contactAttemptService.findLastAttemptByPolicy(203L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(3L).date(LocalDateTime.now()).type(ContactAttemptType.EMAIL)
                             .result(ContactAttemptResult.CONTACTED).build()));
-            when(contactAttemptRepository.countByPolicyId(anyLong())).thenReturn(1);
+            when(contactAttemptService.countAttemptsByPolicy(anyLong())).thenReturn(1);
 
             List<PolicySummaryDTO> result = policyService.getPolicies(1L, "not_interested");
 
@@ -516,7 +423,7 @@ class PolicyServiceImplTest {
         void filterInterested_noAttemptsExcluded() {
             when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
+            when(contactAttemptService.findLastAttemptByPolicy(201L))
                     .thenReturn(Optional.empty());
 
             List<PolicySummaryDTO> result = policyService.getPolicies(1L, "interested");
@@ -529,7 +436,7 @@ class PolicyServiceImplTest {
         void filterNotInterested_wrongResultExcluded() {
             when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
+            when(contactAttemptService.findLastAttemptByPolicy(201L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(1L).date(LocalDateTime.now()).type(ContactAttemptType.CALL)
                             .result(ContactAttemptResult.LEFT_MESSAGE).build()));
@@ -551,19 +458,19 @@ class PolicyServiceImplTest {
 
             when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(policyWithInterest, policyWithInterest2, policyWithNoInterest));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(201L))
+            when(contactAttemptService.findLastAttemptByPolicy(201L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(1L).date(LocalDateTime.now()).type(ContactAttemptType.CALL)
                             .result(ContactAttemptResult.INTERESTED).build()));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(204L))
+            when(contactAttemptService.findLastAttemptByPolicy(204L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(2L).date(LocalDateTime.now()).type(ContactAttemptType.EMAIL)
                             .result(ContactAttemptResult.INTERESTED).build()));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(202L))
+            when(contactAttemptService.findLastAttemptByPolicy(202L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(3L).date(LocalDateTime.now()).type(ContactAttemptType.WHATSAPP)
                             .result(ContactAttemptResult.NOT_INTERESTED).build()));
-            when(contactAttemptRepository.countByPolicyId(anyLong())).thenReturn(1);
+            when(contactAttemptService.countAttemptsByPolicy(anyLong())).thenReturn(1);
 
             List<PolicySummaryDTO> result = policyService.getPolicies(1L, "interested");
 
@@ -584,11 +491,11 @@ class PolicyServiceImplTest {
 
             when(policyRepository.findByAdvisorIdAndStatusIn(1L, List.of(PolicyStatus.ACTIVO, PolicyStatus.VENCIDO)))
                     .thenReturn(List.of(expiredPolicy));
-            when(contactAttemptRepository.findTopByPolicyIdOrderByDateDesc(205L))
+            when(contactAttemptService.findLastAttemptByPolicy(205L))
                     .thenReturn(Optional.of(ContactAttempt.builder()
                             .id(1L).date(LocalDateTime.now()).type(ContactAttemptType.CALL)
                             .result(ContactAttemptResult.INTERESTED).build()));
-            when(contactAttemptRepository.countByPolicyId(205L)).thenReturn(1);
+            when(contactAttemptService.countAttemptsByPolicy(205L)).thenReturn(1);
 
             List<PolicySummaryDTO> result = policyService.getPolicies(1L, "interested");
 
@@ -655,7 +562,7 @@ class PolicyServiceImplTest {
             when(policyRepository.save(any(Policy.class)))
                     .thenReturn(savedOld)
                     .thenReturn(newPolicy);
-            when(contactAttemptRepository.countByPolicyId(301L)).thenReturn(0);
+            when(contactAttemptService.countAttemptsByPolicy(301L)).thenReturn(0);
 
             PolicySummaryDTO result = policyService.renewPolicy(300L, request);
 
@@ -764,54 +671,12 @@ class PolicyServiceImplTest {
             when(policyRepository.save(any(Policy.class)))
                     .thenReturn(savedOld)
                     .thenReturn(newPolicy);
-            when(contactAttemptRepository.countByPolicyId(304L)).thenReturn(0);
+            when(contactAttemptService.countAttemptsByPolicy(304L)).thenReturn(0);
 
             PolicySummaryDTO result = policyService.renewPolicy(303L, request);
 
             assertThat(result).isNotNull();
             assertThat(result.getStatus()).isEqualTo("ACTIVO");
-        }
-    }
-
-    // ──────────────────────────────────────────────
-    //  findOrCreateClient()
-    // ──────────────────────────────────────────────
-
-    @Nested
-    @DisplayName("findOrCreateClient()")
-    class FindOrCreateClientTests {
-
-        @Test
-        @DisplayName("returns existing client when found by name and phone")
-        void findOrCreateClient_returnsExisting() {
-            when(clientRepository.findByAdvisorIdAndNameAndPhone(1L, "Juan Pérez", "+57 310 111 2233"))
-                    .thenReturn(Optional.of(testClient));
-
-            Client result = policyService.findOrCreateClient("Juan Pérez", "+57 310 111 2233", null, null, 1L);
-
-            assertThat(result).isSameAs(testClient);
-            verify(clientRepository, never()).save(any());
-        }
-
-        @Test
-        @DisplayName("creates new client when not found")
-        void findOrCreateClient_createsNew() {
-            Client newClient = Client.builder()
-                    .id(99L)
-                    .name("Nuevo Cliente")
-                    .phone("+57 300 999 8877")
-                    .advisor(defaultAdvisor)
-                    .build();
-
-            when(clientRepository.findByAdvisorIdAndNameAndPhone(1L, "Nuevo Cliente", "+57 300 999 8877"))
-                    .thenReturn(Optional.empty());
-            when(advisorRepository.findById(1L)).thenReturn(Optional.of(defaultAdvisor));
-            when(clientRepository.save(any(Client.class))).thenReturn(newClient);
-
-            Client result = policyService.findOrCreateClient("Nuevo Cliente", "+57 300 999 8877", null, null, 1L);
-
-            assertThat(result).isNotNull();
-            assertThat(result.getName()).isEqualTo("Nuevo Cliente");
         }
     }
 }
