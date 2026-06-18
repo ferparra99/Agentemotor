@@ -35,10 +35,7 @@ public class ClientServiceImpl implements ClientService {
     @Transactional(readOnly = true)
     public List<ClientDetailDTO> getAllClients(Long advisorId) {
         return clientRepository.findByAdvisorId(advisorId).stream()
-                .map(c -> ClientDetailDTO.builder()
-                        .id(c.getId())
-                        .name(c.getName())
-                        .build())
+                .map(this::buildClientDetailDTO)
                 .toList();
     }
 
